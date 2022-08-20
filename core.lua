@@ -2,7 +2,9 @@
 --  Created by Samedi on 20/08/2022.
 --  All code (c) 2022, The Samedi Corporation.
 -- -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-ModulaCore = {}
+ModulaCore = {
+    class = "ModulaCore"
+}
 
 function ModulaCore.new(system, library, player, construct, unit, settings)
     settings = settings or {}
@@ -13,16 +15,19 @@ function ModulaCore.new(system, library, player, construct, unit, settings)
         _actions = {},
         _elements = {},
         _state = {},
-        _skipLoader = settings.devMode or false,
+        _skipLocal = settings.devMode or false,
         _logging = settings.logging or false,
         _logElements = settings.logElements or false,
         _logActions = settings.logActions or false,
-        _timers = {}
+        _timers = {},
+        _handlers = {}
     }
 
     setmetatable(instance, {__index = ModulaCore})
 
     instance:setupGlobals(system, library, player, construct, unit)
+    instance:setupHandlers()
+    instance:registerModules()
 
     debug("Initialised Modula Core")
 
@@ -33,13 +38,22 @@ end
 -- Safe Calling With Error Reporting
 -- ---------------------------------------------------------------------
 
-function ModulaCore:call(method, ...)
-    local status, failure = pcall(method, self, ...)
-    if not status then
-        failure = failure:gsub('"%-%- |STDERROR%-EVENTHANDLER[^"]*"','chunk'):
-        print(failure)
-        fail(failure)
-        return failure
+function ModulaCore:call(handler, ...)
+    local objects = self._handlers[handler]
+    if not objects then
+        return
+    end
+
+    for i,o in pairs(objects) do
+        print("calling %s on %s", handler, o.class)
+        local func = o[handler]
+        local status, failure = pcall(func, o, ...)
+        if not status then
+            failure = failure:gsub('"%-%- |STDERROR%-EVENTHANDLER[^"]*"','chunk'):
+            print(failure)
+            fail(failure)
+            return failure
+        end
     end
 end
 
@@ -47,24 +61,22 @@ end
 -- Event Handlers
 -- ---------------------------------------------------------------------
 
-function ModulaCore:onStart()
-    self:loadElements()
-    self:registerModules()
+function ModulaCore:setupHandlers()
+    self._handlers = {
+        onStart = { self },
+        onStop = {},
+        onActionStart = {},
+        onActionLoop = {},
+        onActionStop = {},
+        onUpdate = {},
+        onFlush = {},
+        onInput = {}
+    }
 end
 
-function ModulaCore:onStop() end
-
-function ModulaCore:onActionStart(action) end
-
-function ModulaCore:onActionLoop(action) end
-
-function ModulaCore:onActionStop(action) end
-
-function ModulaCore:onUpdate() end
-
-function ModulaCore:onFlush() end
-
-function ModulaCore:onInput(text) end
+function ModulaCore:onStart()
+    self:loadElements()
+end
 
 -- ---------------------------------------------------------------------
 -- Modules
@@ -79,11 +91,12 @@ end
 function ModulaCore:registerModule(name, parameters)
     debug("Registering module: %s", name)
     local loaded = self:loadModule(name)
-    local module = loaded.new(parameters)
-    module._controller = self
+    local module = loaded.new(self, parameters)
     table.insert(self._modules, module)
     table.insert(self._moduleNames, name)
     self._moduleIndex[name] = module
+
+    module.register()
 
     return module
 end
@@ -91,7 +104,7 @@ end
 function ModulaCore:loadModule(name)
     local module
 
-    if not self._skipLoader then
+    if not self._skipLocal then
         local loaderName = name:gsub("[.]", "_")
         local loader = _G[string.format("MODULE_%s", loaderName)]
         module = loader()
