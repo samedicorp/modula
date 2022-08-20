@@ -71,17 +71,19 @@ function ModulaCore:call(handler, ...)
     end
 end
 
-function ModulaCore:registerForEvent(handler, object)
-    debug("Registering %s for event %s", object.name, handler)
+function ModulaCore:registerForEvents(handlers, object)
+    for i,handler in ipairs(handlers) do
+        debug("Registering %s for event %s", object.name, handler)
 
-    if not object[handler] then
-        warning("Module %s does not have a handler for %s", object.name, handler)
-    else
-        local handlers = self._handlers[handler]
-        if handlers then
-            table.insert(object)
+        if not object[handler] then
+            warning("Module %s does not have a handler for %s", object.name, handler)
         else
-            handlers[handler] = { object }
+            local registered = self._handlers[handler]
+            if registered then
+                table.insert(registered, object)
+            else
+                handlers[handler] = { object }
+            end
         end
     end
 end
