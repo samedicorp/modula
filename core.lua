@@ -9,7 +9,9 @@ ModulaCore = {
 function ModulaCore.new(system, library, player, construct, unit, settings)
     settings = settings or {}
     local instance = {
-        _modules = {},
+        _modules = settings.modules or {},
+        _moduleNames = {},
+        _moduleIndex = {},
         _actions = {},
         _elements = {},
         _state = {},
@@ -23,7 +25,6 @@ function ModulaCore.new(system, library, player, construct, unit, settings)
     setmetatable(instance, { __index = ModulaCore })
 
     instance:setupGlobals(system, library, player, construct, unit)
-    instance:loadElements()
 
     debug("Initialised Modula Core")
     
@@ -34,7 +35,17 @@ end
 -- Event Handlers
 -- -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
+function ModulaCore:call(method, ...)
+    local status, failure = pcall(method, self, ...)
+    if not status then
+        fail(failure)
+        return failure
+    end
+end
+
 function ModulaCore:onStart()
+    self:loadElements()
+    self:registerModules()
 end
 
 function ModulaCore:onStop()
@@ -58,6 +69,45 @@ end
 function ModulaCore:onInput(text)
 end
 
+-- ---------------------------------------------------------------------
+-- Modules
+-- ---------------------------------------------------------------------
+
+function ModulaCore:registerModules()
+    for module, parameters in pairs(self._modules or {}) do
+        self:registerModule(module, parameters)
+    end
+end
+
+
+function ModulaCore:registerModule(name, parameters) 
+    debug("Registering module: %s", name)
+    local loaded = self:loadModule(name)
+    local module = loaded.new(parameters)
+    module._controller = self
+    table.insert(self._modules, module)
+    table.insert(self._moduleNames, name)
+    self._moduleIndex[name] = module
+    
+    return module
+end
+
+
+function ModulaCore:loadModule(name)
+    local module
+    
+    if not self._skipLoader then
+        local loaderName = name:gsub("[.]", "_")
+        local loader = _G[string.format("MODULE_%s", loaderName)]
+        module = loader()
+    end
+
+    if not module then
+        module = require(string.format(name))
+    end
+
+    return module
+end
 
 -- ---------------------------------------------------------------------
 -- Elements
@@ -197,6 +247,19 @@ function ModulaCore:setupGlobals(system, library, player, construct, unit)
         system.showScreen(1)
         system.setScreen(string.format('<div class="window" style="position: absolute; top="10vh"; left="45vw"; width="10vw"><h1 style="middle">Error</h1><span>%s</span></div>', message))
     end
+end
+
+function ModulaCore:testPrint()
+    print(1)
+    print(1.24)
+    print(true)
+    print("test")
+    print({ foo = { wibble = "bar" }})
+
+    debug("debug")
+    warning("warning")
+    log("logged")
+    fail("failure")
 end
 
 return ModulaCore
