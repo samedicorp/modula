@@ -17,7 +17,7 @@ function ModulaCore.new(system, library, player, construct, unit, settings)
     setmetatable(instance, { __index = ModulaCore })
 
     instance:setupGlobals(system, library, player, construct, unit)
-    print("started")
+    debug("modula: initialised")
     
     return instance
 end
@@ -63,13 +63,11 @@ function ModulaCore:setupGlobals(system, library, player, construct, unit)
         end
     end
 
-    -- if self._logging then
-    --     _G.debug = _G.print
-    -- else
-    --     _G.debug = function() end
-    -- end
-
-    system.print("blah")
+    if self._logging then
+        _G.debug = _G.print
+    else
+        _G.debug = function(format, ...) end
+    end
 
     -- _G.logf = function(s,...)
     --     local message = s:format(...) 
