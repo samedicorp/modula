@@ -2,9 +2,14 @@
 ModulaCore = {
 }
 
-function ModulaCore.new(settings)
+function ModulaCore.new(system, library, player, construct, unit, settings)
     settings = settings or {}
     local instance = {
+        system = system,
+        library = library,
+        player = player,
+        construct = construct,
+        unit = unit,
         _modules = {},
         _actions = {},
         _state = {},
@@ -16,6 +21,8 @@ function ModulaCore.new(settings)
     }
 
     setmetatable(instance, { __index = ModulaCore })
+
+    instance:log("started")
 
     return instance
 end
@@ -42,6 +49,10 @@ function ModulaCore:onFlush()
 end
 
 function ModulaCore:onInput(text)
+end
+
+function ModulaCore:log(item)
+    self.system.print(item)
 end
 
 return ModulaCore
