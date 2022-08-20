@@ -34,9 +34,23 @@ function ModulaCore.new(system, library, player, construct, unit, settings)
     return instance
 end
 
+
 -- ---------------------------------------------------------------------
--- Safe Calling With Error Reporting
+-- Event Handlers
 -- ---------------------------------------------------------------------
+
+function ModulaCore:setupHandlers()
+    self._handlers = {
+        onStart = { self },
+        onStop = {},
+        onActionStart = {},
+        onActionLoop = {},
+        onActionStop = {},
+        onUpdate = {},
+        onFlush = {},
+        onInput = {}
+    }
+end
 
 function ModulaCore:call(handler, ...)
     local objects = self._handlers[handler]
@@ -57,21 +71,19 @@ function ModulaCore:call(handler, ...)
     end
 end
 
--- ---------------------------------------------------------------------
--- Event Handlers
--- ---------------------------------------------------------------------
+function ModulaCore:registerForEvent(handler, object)
+    debug("Registering %s for event %s", object.name, handler)
 
-function ModulaCore:setupHandlers()
-    self._handlers = {
-        onStart = { self },
-        onStop = {},
-        onActionStart = {},
-        onActionLoop = {},
-        onActionStop = {},
-        onUpdate = {},
-        onFlush = {},
-        onInput = {}
-    }
+    if not object[handler] then
+        warning("Module %s does not have a handler for %s", object.name, handler)
+    else
+        local handlers = self._handlers[handler]
+        if handlers then
+            table.insert(object)
+        else
+            handlers[handler] = { object }
+        end
+    end
 end
 
 function ModulaCore:onStart()
@@ -89,15 +101,20 @@ function ModulaCore:registerModules()
 end
 
 function ModulaCore:registerModule(name, parameters)
-    debug("Registering module: %s", name)
-    local loaded = self:loadModule(name)
-    local module = loaded.new(self, parameters)
-    table.insert(self._modules, module)
-    table.insert(self._moduleNames, name)
-    self._moduleIndex[name] = module
+    local prototype = self:loadModule(name)
+    if prototype then
+        debug("Registering module: %s", name)
+        local module = {}
+        setmetatable(module, { __index = prototype })
 
-    module.register()
+        table.insert(self._modules, module)
+        table.insert(self._moduleNames, name)
+        self._moduleIndex[name] = module
 
+        module:register(self, parameters)
+    else
+        warning("Can't find module %s", name)
+    end
     return module
 end
 
@@ -112,6 +129,7 @@ function ModulaCore:loadModule(name)
 
     if not module then module = require(string.format(name)) end
 
+    module.name = name
     return module
 end
 
