@@ -2,9 +2,7 @@
 --  Created by Samedi on 20/08/2022.
 --  All code (c) 2022, The Samedi Corporation.
 -- -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-
-ModulaCore = {
-}
+ModulaCore = {}
 
 function ModulaCore.new(system, library, player, construct, unit, settings)
     settings = settings or {}
@@ -19,55 +17,54 @@ function ModulaCore.new(system, library, player, construct, unit, settings)
         _logging = settings.logging or false,
         _logElements = settings.logElements or false,
         _logActions = settings.logActions or false,
-        _timers = { },
+        _timers = {}
     }
 
-    setmetatable(instance, { __index = ModulaCore })
+    setmetatable(instance, {__index = ModulaCore})
 
     instance:setupGlobals(system, library, player, construct, unit)
 
     debug("Initialised Modula Core")
-    
+
     return instance
 end
 
--- -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
--- Event Handlers
--- -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+-- ---------------------------------------------------------------------
+-- Safe Calling With Error Reporting
+-- ---------------------------------------------------------------------
 
 function ModulaCore:call(method, ...)
     local status, failure = pcall(method, self, ...)
     if not status then
+        failure = failure:gsub('"%-%- |STDERROR%-EVENTHANDLER[^"]*"','chunk'):
+        print(failure)
         fail(failure)
         return failure
     end
 end
+
+-- ---------------------------------------------------------------------
+-- Event Handlers
+-- ---------------------------------------------------------------------
 
 function ModulaCore:onStart()
     self:loadElements()
     self:registerModules()
 end
 
-function ModulaCore:onStop()
-end
+function ModulaCore:onStop() end
 
-function ModulaCore:onActionStart(action)
-end
+function ModulaCore:onActionStart(action) end
 
-function ModulaCore:onActionLoop(action)
-end
+function ModulaCore:onActionLoop(action) end
 
-function ModulaCore:onActionStop(action)
-end
+function ModulaCore:onActionStop(action) end
 
-function ModulaCore:onUpdate()
-end
+function ModulaCore:onUpdate() end
 
-function ModulaCore:onFlush()
-end
+function ModulaCore:onFlush() end
 
-function ModulaCore:onInput(text)
-end
+function ModulaCore:onInput(text) end
 
 -- ---------------------------------------------------------------------
 -- Modules
@@ -79,8 +76,7 @@ function ModulaCore:registerModules()
     end
 end
 
-
-function ModulaCore:registerModule(name, parameters) 
+function ModulaCore:registerModule(name, parameters)
     debug("Registering module: %s", name)
     local loaded = self:loadModule(name)
     local module = loaded.new(parameters)
@@ -88,23 +84,20 @@ function ModulaCore:registerModule(name, parameters)
     table.insert(self._modules, module)
     table.insert(self._moduleNames, name)
     self._moduleIndex[name] = module
-    
+
     return module
 end
 
-
 function ModulaCore:loadModule(name)
     local module
-    
+
     if not self._skipLoader then
         local loaderName = name:gsub("[.]", "_")
         local loader = _G[string.format("MODULE_%s", loaderName)]
         module = loader()
     end
 
-    if not module then
-        module = require(string.format(name))
-    end
+    if not module then module = require(string.format(name)) end
 
     return module
 end
@@ -116,7 +109,8 @@ end
 function ModulaCore:loadElements()
     local all = self:allElements()
     local elements = self:categoriseElements(all)
-    local cores = elements.CoreUnitStatic or elements.CoreUnitDynamic or elements.CoreUnitSpace
+    local cores = elements.CoreUnitStatic or elements.CoreUnitDynamic or
+                      elements.CoreUnitSpace
     if cores and (#cores > 0) then
         self._core = cores[1]
     else
@@ -138,7 +132,7 @@ end
 
 function ModulaCore:allElements()
     local elements = {}
-    for k,v in pairs(_G) do
+    for k, v in pairs(_G) do
         if (k:find("Unit_") == 1) and (v.getElementClass) then
             table.insert(elements, v)
         end
@@ -148,7 +142,7 @@ end
 
 function ModulaCore:categoriseElements(elements)
     local categorised = {}
-    for i,element in ipairs(elements) do
+    for i, element in ipairs(elements) do
         local class = element.getClass()
         local classElements = categorised[class]
         if not classElements then
@@ -160,22 +154,18 @@ function ModulaCore:categoriseElements(elements)
     end
 
     if self._logElements then
-        for k,v in pairs(categorised) do
-            debug("Found %s %s.", #v, k)
-        end
-    end            
+        for k, v in pairs(categorised) do debug("Found %s %s.", #v, k) end
+    end
 
     categorised.all = elements
     return categorised
 end
 
-function ModulaCore:findElement(category,  action)
+function ModulaCore:findElement(category, action)
     local list = self._elements[category]
     if list then
         local element = list[1]
-        if action then
-            action(element)
-        end
+        if action then action(element) end
         return element
     end
 end
@@ -183,17 +173,13 @@ end
 function ModulaCore:withElements(category, action)
     local elements = self._elements[category]
     if elements then
-        for i,element in ipairs(elements) do
-            action(element, i)
-        end
+        for i, element in ipairs(elements) do action(element, i) end
     end
 end
-
 
 -- ---------------------------------------------------------------------
 -- Internal
 -- ---------------------------------------------------------------------
-
 
 function ModulaCore:setupGlobals(system, library, player, construct, unit)
     _G.system = _G.system or system
@@ -205,7 +191,7 @@ function ModulaCore:setupGlobals(system, library, player, construct, unit)
     _G.toString = function(item)
         if type(item) == "table" then
             local text = {}
-            for k,v in pairs(item) do
+            for k, v in pairs(item) do
                 table.insert(text, string.format("%s: %s", k, toString(v)))
             end
             return "{ " .. table.concat(text, ", ") .. " }"
@@ -221,9 +207,7 @@ function ModulaCore:setupGlobals(system, library, player, construct, unit)
             system.print(format:format(...))
         else
             system.print(toString(format))
-            for i,a in ipairs({ ... }) do
-                system.print(toString(a))
-            end
+            for i, a in ipairs({...}) do system.print(toString(a)) end
         end
     end
 
@@ -233,8 +217,8 @@ function ModulaCore:setupGlobals(system, library, player, construct, unit)
         _G.debug = function(format, ...) end
     end
 
-    _G.log = function(format,...)
-        local message = format:format(...) 
+    _G.log = function(format, ...)
+        local message = format:format(...)
         system.logInfo(string.format("§±%s±§", message))
     end
 
@@ -245,7 +229,13 @@ function ModulaCore:setupGlobals(system, library, player, construct, unit)
     _G.fail = function(format, ...)
         local message = format:format(...)
         system.showScreen(1)
-        system.setScreen(string.format('<div class="window" style="position: absolute; top="10vh"; left="45vw"; width="10vw"><h1 style="middle">Error</h1><span>%s</span></div>', message))
+        system.setScreen(string.format(
+                             '<div class="window" style="position: absolute; top="10vh"; left="45vw"; width="10vw"><h1 style="middle">Error</h1><span>%s</span></div>',
+                             htmlEscape(message)))
+    end
+
+    _G.htmlEscape = function(item)
+        return tostring(item):gsub("&", "&amp;"):gsub("<","&lt;"):gsub(">", "&gt;"):gsub("\n", "<br>")
     end
 end
 
@@ -254,7 +244,7 @@ function ModulaCore:testPrint()
     print(1.24)
     print(true)
     print("test")
-    print({ foo = { wibble = "bar" }})
+    print({foo = {wibble = "bar"}})
 
     debug("debug")
     warning("warning")
