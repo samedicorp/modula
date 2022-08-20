@@ -84,24 +84,20 @@ function ModulaCore:setupGlobals(system, library, player, construct, unit)
         _G.debug = function(format, ...) end
     end
 
-    -- _G.logf = function(s,...)
-    --     local message = s:format(...) 
-    --     system.logInfo(string.format("§±%s±§", message))
-    -- end
+    _G.log = function(format,...)
+        local message = format:format(...) 
+        system.logInfo(string.format("§±%s±§", message))
+    end
 
-    -- _G.warning = function(s, ...)
-    --     printf("WARNING: %s", s:format(...))
-    -- end
+    _G.warning = function(format, ...)
+        print("WARNING: %s", format:format(...))
+    end
 
-    -- _G.fail = function(s, ...)
-    --     local message = s:format(...)
-    --     system.showScreen(1)
-    --     system.setScreen(string.format('<div class="window" style="position: absolute; top="10vh"; left="45vw"; width="10vw"><h1 style="middle">Error</h1><span>%s</span></div>', message))
-    -- end
-end
-
-function ModulaCore:log(item)
-    print(item)
+    _G.fail = function(format, ...)
+        local message = format:format(...)
+        system.showScreen(1)
+        system.setScreen(string.format('<div class="window" style="position: absolute; top="10vh"; left="45vw"; width="10vw"><h1 style="middle">Error</h1><span>%s</span></div>', message))
+    end
 end
 
 return ModulaCore
