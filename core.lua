@@ -53,13 +53,28 @@ function ModulaCore:setupGlobals(system, library, player, construct, unit)
     _G.player = _G.player or player
     _G.construct = _G.construct or construct
 
-    _G.print = function(format, ...)
-        if type(format) == "table" then
-            for k,v in pairs(format) do
-                system.print(string.format("%s: %s", k, v))
+    _G.toString = function(item)
+        if type(item) == "table" then
+            local text = {}
+            for k,v in pairs(item) do
+                table.insert(text, string.format("%s: %s", k, toString(v)))
             end
+            return "{ " .. table.concat(text, ", ") .. " }"
         else
+            return tostring(item)
+        end
+    end
+
+    _G.print = function(format, ...)
+        local t = type(format)
+
+        if type(format) == "string" then
             system.print(format:format(...))
+        else
+            system.print(toString(format))
+            for i,a in ipairs({ ... }) do
+                system.print(toString(a))
+            end
         end
     end
 
