@@ -31,6 +31,24 @@ Installing git is not strictly necessary but probably a good idea.
 
 For development I use VS Code. A build script is included which runs the pack script when you hit Ctrl-Shift-B. This automatically packs the complete script into a `.conf` file in `autoconf/custom`. It also writes a `.json` file to the same place.
 
+## Modules
+
+Modula is based around the idea of combining modules.
+
+Each module in Modula is a Lua object that provides some functionality to the overall script. 
+
+Modules are registered with the core. During registration a module can ask to respond to certain events and actions. They can also publish their services, to be used by other modules. 
+
+The idea here that each module has a clearly defined tasks - such as showing an altimeter, managing auto-braking, managing the landing gear, controlling flight, etc. 
+
+You can combine these modules in different ways to make the overall script that you want. 
+
+You can also share these modules between multiple scripts.
+
+If you want a different style of altimeter, you simply replace the altimeter module. If your ship doesn't have a warp drive, you don't bother with the warp module. Etc. 
+
+When the script is finally packed up for distribution, only the code for the modules that were used is actually included.
+
 ## Example
 
 For an example script, see [this project](https://github.com/samedicorp/modula-test).
