@@ -171,6 +171,10 @@ function ModulaCore:registerService(name, module)
     self.services[name] = module
 end
 
+function ModulaCore:getService(name)
+    return self.services[name]
+end
+
 -- ---------------------------------------------------------------------
 -- Modules
 -- ---------------------------------------------------------------------
@@ -185,7 +189,7 @@ function ModulaCore:registerModule(name, parameters)
     local prototype = self:loadModule(name)
     if prototype then
         debug("Registering module: %s", name)
-        local module = {}
+        local module = { modula = self }
         setmetatable(module, { __index = prototype })
 
         table.insert(self.modules, module)
