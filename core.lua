@@ -52,7 +52,8 @@ function ModulaCore:setupHandlers()
         onActionStop = {},
         onUpdate = {},
         onFlush = {},
-        onInput = { self }
+        onInput = { self },
+        onCommand = { self }
     }
 end
 
@@ -63,7 +64,7 @@ function ModulaCore:call(handler, ...)
     end
 
     for i,o in pairs(objects) do
-        print("calling %s on %s", handler, o.name)
+        debug("calling %s on %s", handler, o.name)
         local func = o[handler]
         local status, failure = pcall(func, o, ...)
         if not status then
@@ -102,9 +103,24 @@ function ModulaCore:onInput(text)
         table.insert(words, word)
     end
 
-    if words[1] == "version" then
+    local command = words[1]
+    table.remove(words, 1)
+    self:call("onCommand", command, words)
+end
+
+function ModulaCore:onCommand(command, arguments)
+    if command == "version" then
         print("Version %s", self.version)
     end
+end
+
+-- ---------------------------------------------------------------------
+-- Services
+-- ---------------------------------------------------------------------
+
+function ModulaCore:registerService(name, module)
+    debug("Registered %s as service %s", module.name, name)
+    self.services[name] = module
 end
 
 -- ---------------------------------------------------------------------
@@ -269,12 +285,12 @@ function ModulaCore:action(action, mode)
                 end
 
                 local elapsed = (time - entry.startTime)
-                if entry.long and (elapsed > self._longPressTime) then
+                if entry.long and (elapsed > self.longPressTime) then
                     -- do the long press if enough time has elapsed
                     handler = entry.long
                     entry.longDone = true
                 
-                elseif (time - entry.loopTime) < self._loopRepeat then
+                elseif (time - entry.loopTime) < self.loopRepeat then
                     -- if not enough time has passed yet, skip this loop iteration
                     return
                 end
@@ -307,18 +323,18 @@ function ModulaCore:adjust(delta, mode, action)
     local time = system.getTime()
     local shouldUpdate = true
     if mode == "loop" then
-        local lastTime = self._adjustTimes[action] or 0
-        shouldUpdate = (time - lastTime) > self._adjustRepeat
+        local lastTime = self.adjustTimes[action] or 0
+        shouldUpdate = (time - lastTime) > self.adjustRepeat
     end
 
     if shouldUpdate then
         action(delta)
-        self._adjustTimes[action] = time            
+        self.adjustTimes[action] = time            
     end
 end
 
 function ModulaCore:perform(module, mode, shortAction, longAction)
-    local data = self._performData or {}
+    local data = self.performData or {}
     local name = module.class
     if mode == ActionMode.start then
         data[name] = system.getTime()
@@ -334,7 +350,7 @@ function ModulaCore:perform(module, mode, shortAction, longAction)
             data[name] = nil
         end
     end
-    self._performData = data
+    self.performData = data
 end
 
 -- ---------------------------------------------------------------------
@@ -420,7 +436,7 @@ function ModulaCore:setupGlobals(system, library, player, construct, unit)
         end
     end
 
-    if self._logging then
+    if self.logging then
         _G.debug = _G.print
     else
         _G.debug = function(format, ...) end
