@@ -31,6 +31,7 @@ function ModulaCore.new(system, library, player, construct, unit, settings)
         handlers = {},
         loopRepeat = 0.6,
         longPressTime = 0.5,
+        running = false
     }
 
     setmetatable(instance, {__index = ModulaCore})
@@ -39,8 +40,12 @@ function ModulaCore.new(system, library, player, construct, unit, settings)
     instance:setupHandlers()
     instance:registerModules()
     instance:registerActions(settings.actions or {})
+    instance:loadElements()
+    instance:addTimer("onFastUpdate", 1.0 / 30.0)
+    instance:addTimer("onSlowUpdate", 1.0)
 
     debug("Initialised Modula Core")
+    instance.running = true
 
     return instance
 end
@@ -53,14 +58,13 @@ end
 function ModulaCore:setupHandlers()
     self.handlers = {
         onStart = { self },
-        onStop = {},
+        onStop = { self },
         onActionStart = { self },
         onActionLoop = { self },
         onActionStop = { self },
-        onUpdate = {},
-        onFlush = {},
         onInput = { self },
-        onCommand = { self }
+        onCommand = { self },
+        onTick = { self }
     }
 end
 
@@ -96,14 +100,18 @@ function ModulaCore:registerForEvents(handlers, object)
             if registered then
                 table.insert(registered, object)
             else
-                handlers[handler] = { object }
+                self.handlers[handler] = { object }
             end
         end
     end
 end
 
 function ModulaCore:onStart()
-    self:loadElements()
+end
+
+function ModulaCore:onStop()
+    self.running = false
+    self:stopTimers()
 end
 
 function ModulaCore:onInput(text)
@@ -133,6 +141,25 @@ end
 
 function ModulaCore:onActionLoop(action)
     self:dispatchAction(action, "loop")
+end
+
+function ModulaCore:onTick(timer)
+    self:call(timer)
+end
+
+-- ---------------------------------------------------------------------
+-- Timers
+-- ---------------------------------------------------------------------
+
+function ModulaCore:addTimer(name, rate)
+    table.insert(self.timers, name)
+    unit.setTimer(name, rate)
+end
+
+function ModulaCore:stopTimers()
+    for _,name in ipairs(self.timers) do
+        unit.stopTimer(name)
+    end
 end
 
 -- ---------------------------------------------------------------------
