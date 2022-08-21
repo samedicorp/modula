@@ -25,6 +25,7 @@ function ModulaCore.new(system, library, player, construct, unit, settings)
         useLocal = settings.useLocal or false,
         logging = settings.logging or false,
         logElements = settings.logElements or false,
+        logCalls = settings.logCalls or false,
         logActions = settings.logActions or false,
         timers = {},
         handlers = {}
@@ -68,7 +69,10 @@ function ModulaCore:call(handler, ...)
     end
 
     for i,o in pairs(objects) do
-        debug("calling %s on %s", handler, o.name)
+        if self.logCalls then
+            debug("calling %s on %s", handler, o.name)
+        end
+
         local func = o[handler]
         local status, failure = pcall(func, o, ...)
         if not status then
@@ -118,15 +122,15 @@ function ModulaCore:onCommand(command, arguments)
 end
 
 function ModulaCore:onActionStart(action)
-    self:action(action, "start")
+    self:dispatchAction(action, "start")
 end
 
 function ModulaCore:onActionStop(action)
-    self:action(action, "stop")
+    self:dispatchAction(action, "stop")
 end
 
 function ModulaCore:onActionLoop(action)
-    self:action(action, "loop")
+    self:dispatchAction(action, "loop")
 end
 
 -- ---------------------------------------------------------------------
@@ -278,11 +282,24 @@ function ModulaCore:registerActions(config)
         entry.startTime = 0
         entry.loopTime = 0
         entry.module = self.services[entry.target]
+        if entry.module then
+            self:checkActionHandlers(entry.module, entry.start, entry.stop, entry.loop, entry.long)
+        else
+            warning("No service %s is registered for action %s", entry.target, k)
+        end
     end
     self.actions = config
 end
 
-function ModulaCore:action(action, mode)
+function ModulaCore:checkActionHandlers(module, ...)
+    for i,handler in ipairs({ ... }) do
+        if handler and not module[handler] then
+            warning("Module %s does not have an action handler %s", module.name, handler)
+        end
+    end
+end
+
+function ModulaCore:dispatchAction(action, mode)
     local entry = self.actions[action]
     if entry then
         local module = entry.module
@@ -320,52 +337,20 @@ function ModulaCore:action(action, mode)
             end
 
             if handler then
-                local status, error = pcall(module[handler], module, mode, entry.arg, action)
-                if not status then
-                    debug("%s %s crashed: %s %s %s", entry.target, handler, mode, action, error)
+                local func = module[handler]
+                if func then
+                    local status, error = pcall(func, module, mode, entry.arg, action)
+                    if not status then
+                        debug("%s %s crashed: %s %s %s", entry.target, handler, mode, action, error)
+                    end
                 end
             end
-            return
         end
     end
 
     if self.logActions then
         debug("%s %s no handler", action, mode)
     end
-end
-
-function ModulaCore:adjust(delta, mode, action)
-    local time = system.getTime()
-    local shouldUpdate = true
-    if mode == "loop" then
-        local lastTime = self.adjustTimes[action] or 0
-        shouldUpdate = (time - lastTime) > self.adjustRepeat
-    end
-
-    if shouldUpdate then
-        action(delta)
-        self.adjustTimes[action] = time            
-    end
-end
-
-function ModulaCore:perform(module, mode, shortAction, longAction)
-    local data = self.performData or {}
-    local name = module.class
-    if mode == ActionMode.start then
-        data[name] = system.getTime()
-    elseif mode == ActionMode.loop then
-        local elapsed = system.getTime() - data[name]
-        if elapsed > 0.5 then
-            longAction(module)
-            data[name] = nil
-        end
-    else
-        if data[name] then
-            shortAction(module)
-            data[name] = nil
-        end
-    end
-    self.performData = data
 end
 
 -- ---------------------------------------------------------------------
