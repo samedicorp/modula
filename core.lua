@@ -10,7 +10,11 @@ function ModulaCore.new(system, library, player, construct, unit, settings)
     settings = settings or {}
     local instance = {
         name = "core",
-        constructName = settings.name or "Untitled Construct",
+        version = "1.0",
+        construct = {
+            name = settings.name or "Untitled Construct",
+            version = settings.version or "Unknown"
+        },
         modules = settings.modules or {},
         moduleNames = {},
         moduleIndex = {},
@@ -47,9 +51,9 @@ function ModulaCore:setupHandlers()
     self.handlers = {
         onStart = { self },
         onStop = {},
-        onActionStart = {},
-        onActionLoop = {},
-        onActionStop = {},
+        onActionStart = { self },
+        onActionLoop = { self },
+        onActionStop = { self },
         onUpdate = {},
         onFlush = {},
         onInput = { self },
@@ -99,7 +103,6 @@ end
 function ModulaCore:onInput(text)
     local words = {}
     for word in text:gmatch("%S+") do
-        print(word)
         table.insert(words, word)
     end
 
@@ -110,8 +113,20 @@ end
 
 function ModulaCore:onCommand(command, arguments)
     if command == "version" then
-        print("Version %s", self.version)
+        print("%s Version %s (core %s)", self.construct.name, self.construct.version, self.version)
     end
+end
+
+function ModulaCore:onActionStart(action)
+    self:action(action, "start")
+end
+
+function ModulaCore:onActionStop(action)
+    self:action(action, "stop")
+end
+
+function ModulaCore:onActionLoop(action)
+    self:action(action, "loop")
 end
 
 -- ---------------------------------------------------------------------
@@ -159,13 +174,13 @@ function ModulaCore:loadModule(name)
         module = require(string.format(name)) 
     end
 
-    if not module then
+    if module then
+        debug("Using local module %s", name)
+    else
         -- try to load module from version stashed in library.onStart
         local loaderName = name:gsub("[.-]", "_")
         local loader = _G[string.format("MODULE_%s", loaderName)]
         module = loader()
-    else
-        debug("Using local module %s", name)
     end
 
     if module then
