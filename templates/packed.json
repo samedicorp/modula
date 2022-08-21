@@ -1,0 +1,277 @@
+{
+    "slots": {
+        "0": {
+            "name": "slot1",
+            "type": {
+                "events": [],
+                "methods": []
+            }
+        },
+        "1": {
+            "name": "slot2",
+            "type": {
+                "events": [],
+                "methods": []
+            }
+        },
+        "2": {
+            "name": "slot3",
+            "type": {
+                "events": [],
+                "methods": []
+            }
+        },
+        "3": {
+            "name": "slot4",
+            "type": {
+                "events": [],
+                "methods": []
+            }
+        },
+        "4": {
+            "name": "slot5",
+            "type": {
+                "events": [],
+                "methods": []
+            }
+        },
+        "5": {
+            "name": "slot6",
+            "type": {
+                "events": [],
+                "methods": []
+            }
+        },
+        "6": {
+            "name": "slot7",
+            "type": {
+                "events": [],
+                "methods": []
+            }
+        },
+        "7": {
+            "name": "slot8",
+            "type": {
+                "events": [],
+                "methods": []
+            }
+        },
+        "8": {
+            "name": "slot9",
+            "type": {
+                "events": [],
+                "methods": []
+            }
+        },
+        "9": {
+            "name": "slot10",
+            "type": {
+                "events": [],
+                "methods": []
+            }
+        },
+        "10": {
+            "name": "slot11",
+            "type": {
+                "events": [],
+                "methods": []
+            }
+        },
+        "11": {
+            "name": "slot12",
+            "type": {
+                "events": [],
+                "methods": []
+            }
+        },
+        "12": {
+            "name": "slot13",
+            "type": {
+                "events": [],
+                "methods": []
+            }
+        },
+        "13": {
+            "name": "slot14",
+            "type": {
+                "events": [],
+                "methods": []
+            }
+        },
+        "14": {
+            "name": "slot15",
+            "type": {
+                "events": [],
+                "methods": []
+            }
+        },
+        "15": {
+            "name": "slot16",
+            "type": {
+                "events": [],
+                "methods": []
+            }
+        },
+        "16": {
+            "name": "slot17",
+            "type": {
+                "events": [],
+                "methods": []
+            }
+        },
+        "17": {
+            "name": "slot18",
+            "type": {
+                "events": [],
+                "methods": []
+            }
+        },
+        "18": {
+            "name": "slot19",
+            "type": {
+                "events": [],
+                "methods": []
+            }
+        },
+        "19": {
+            "name": "slot20",
+            "type": {
+                "events": [],
+                "methods": []
+            }
+        },
+        "20": {
+            "name": "slot21",
+            "type": {
+                "events": [],
+                "methods": []
+            }
+        },
+        "-1": {
+            "name": "unit",
+            "type": {
+                "events": [],
+                "methods": []
+            }
+        },
+        "-2": {
+            "name": "system",
+            "type": {
+                "events": [],
+                "methods": []
+            }
+        },
+        "-3": {
+            "name": "library",
+            "type": {
+                "events": [],
+                "methods": []
+            }
+        }
+    },
+    "handlers": [
+        {
+            "code": "if controller then\n    controller:stop()\nend",
+            "filter": {
+                "args": [],
+                "signature": "stop()",
+                "slotKey": "-1"
+            },
+            "key": "0"
+        },
+        {
+            "code": "local devMode = true --export: Use locally installed scripts if present.\nlocal logging = false --export: Enable controller debug output.\nlocal logElements = false --export: Log all discovered elements.\n\n%s\n\nif devMode then\ncontroller = require('samedi.coreController').new(system, unit, library, { logging = logging, logElements = logElements, devMode = true })\ncontroller:run('samedi.configs.%s')\nelse\ncontroller = MODULE_coreController().new(system, unit, library, { logging = logging, logElements = logElements })\ncontroller:run(MODULE_config())\nend",
+            "filter": {
+                "args": [],
+                "signature": "start()",
+                "slotKey": "-1"
+            },
+            "key": "1"
+        },
+        {
+            "code": "%s",
+            "filter": {
+                "args": [],
+                "signature": "start()",
+                "slotKey": "-3"
+            },
+            "key": "1"
+        },
+        {
+            "code": "controller:tick(timerId)",
+            "filter": {
+                "args": [
+                    {
+                        "variable": "*"
+                    }
+                ],
+                "signature": "tick(timerId)",
+                "slotKey": "-1"
+            },
+            "key": "2"
+        },
+        {
+            "code": "if controller then\n    controller:flush()\nend",
+            "filter": {
+                "args": [],
+                "signature": "flush()",
+                "slotKey": "-2"
+            },
+            "key": "3"
+        },
+        {
+            "code": "controller:input(text)",
+            "filter": {
+                "args": [
+                    {
+                        "variable": "*"
+                    }
+                ],
+                "signature": "inputText(text)",
+                "slotKey": "-2"
+            },
+            "key": "4"
+        },
+        {
+            "code": "controller:action(action, \"stop\")",
+            "filter": {
+                "args": [
+                    {
+                        "variable": "*"
+                    }
+                ],
+                "signature": "actionStop(action)",
+                "slotKey": "-2"
+            },
+            "key": "5"
+        },
+        {
+            "code": "controller:action(action, \"loop\")",
+            "filter": {
+                "args": [
+                    {
+                        "variable": "*"
+                    }
+                ],
+                "signature": "actionLoop(action)",
+                "slotKey": "-2"
+            },
+            "key": "6"
+        },
+        {
+            "code": "controller:action(action, \"start\")",
+            "filter": {
+                "args": [
+                    {
+                        "variable": "*"
+                    }
+                ],
+                "signature": "actionStart(action)",
+                "slotKey": "-2"
+            },
+            "key": "7"
+        }
+    ],
+    "methods": [],
+    "events": []
+}

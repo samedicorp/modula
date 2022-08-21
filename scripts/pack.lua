@@ -18,7 +18,6 @@ function lastPathComponent(path)
   end
 
 function load(path)
-    print("loading" .. path)
     local f = io.open(path, 'r')
     local t = ""
     if f then
@@ -75,23 +74,7 @@ function scanModules(root, path, prefix, modules)
         end
 
         appendSource(path, safeName)
-
-        print(name)
-        print(path)
     end
-    -- iterateFiles(root .. path, 
-    --     function(name, extension, file)
-    --         local fullName = prefix .. name
-    --         local parameters = modules[fullName]
-    --         if parameters then
-
-    --             appendSource(file, fullName:gsub("[.]", "_"))
-    --             local setup = string.format("%s = flight:useModule(\"%s\"%s)", name, name, paramstr)
-    --             table.insert(modules, setup)
-    --             print(string.format("Installed module %s", name))
-    --         end
-    --     end
-    -- )
 end
 
 function jsonEscaped(string)
@@ -104,22 +87,24 @@ source = {}
 appendSource(root .. "samedicorp/modula/core.lua", "core")
 scanModules(root, "samedicorp", "", config.modules)
 
-local moduleSource = table.concat(source, "\n")
-print(moduleSource)
--- source = {}
--- appendSource(root .. "configs/" .. configName .. ".lua", "config")
--- local configSource = table.concat(source, "\n")
+local configSource = load("configure.lua")
+local configEscaped = jsonEscaped(configSource)
 
--- local luaPath = root .. "packed/" .. configName .. ".lua"
--- local luaTemplate = load(root .. "templates/packed.lua")
+local moduleSource = table.concat(source, "\n")
+local moduleEscaped = jsonEscaped(moduleSource)
+
+local outputPath = root .. "autoconf/custom/"
+-- local luaPath = outputPath .. config.name .. ".lua"
+-- local luaTemplate = load(root .. "samedicorp/modula/templates/packed.lua")
 -- save(luaPath, string.format(luaTemplate, moduleSource, configSource))
 
--- local moduleEscaped = jsonEscaped(moduleSource)
--- local configEscaped = jsonEscaped(configSource)
--- local jsonPath = root .. "packed/" .. configName .. ".json"
--- local jsonTemplate = load(root .. "templates/packed.json")
--- save(jsonPath, string.format(jsonTemplate, configEscaped, configName, moduleEscaped))
+local jsonPath = outputPath .. config.name .. ".json"
+local jsonTemplate = load(root .. "samedicorp/modula/templates/packed.json")
+save(jsonPath, string.format(jsonTemplate, configEscaped, config.name, moduleEscaped))
 
+local confPath = outputPath .. config.name .. ".conf"
+local confTemplate = load(root .. "samedicorp/modula/templates/packed.conf")
+save(confPath, string.format(confTemplate, config.name, configSource, moduleSource))
 
 print("Done.")
 
