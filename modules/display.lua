@@ -6,8 +6,8 @@
 local Module = {}
 
 function Module:register(modula, parameters)
-    modula:registerForEvents({"onStart", "onStop", "onCommand"}, self)
-    modula:registerService("test", self)
+    modula:registerForEvents({"onStart", "onStop", "onFastUpdate"}, self)
+    modula:registerService("display", self)
 
     self.widgetRecords = {}
     self.panels = {}
@@ -19,11 +19,9 @@ function Module:register(modula, parameters)
 end
 
 function Module:onStart()
+    debug("Display module started.")
 
     self:addPanel("default", "Display", true)
-    local module = self
-    controller:addTimer("displayUpdate", 1.0 / 30.0, function() module:refresh() end)
-
     self.html = [[<style>
     :root {
         --primary-color: #7fff00;
@@ -56,7 +54,7 @@ function Module:onStart()
     debug("Display manager running.")
 end
 
-function Module:stop()
+function Module:onStop()
     system.showScreen(0)
 
     for name,widget in pairs(self.widgetRecords) do
@@ -73,15 +71,15 @@ function Module:stop()
     self.panel = nil
 end
 
-function Module:refresh()
-    local flight = self.flight
-    local controller = self.controller
-    local core = controller:getCore()
+function Module:onFastUpdate()
+    -- local flight = self.flight
+    -- local controller = self.controller
+    -- local core = controller:getCore()
 
-    controller:callModules("updateDisplay", self)
-    self:updateMenus()
+    self.modula:call("onDisplayUpdate", self)
+    -- self:updateMenus()
 
-    self.frame = self.frame + 1
+    -- self.frame = self.frame + 1
 
     if self.screenDirty then
         -- debug("%s built screen", self.frame)
@@ -95,75 +93,6 @@ function Module:refresh()
         self.screenDirty = false
     end
 end
-
-function Module:getLog(kind)
-    local record = self.logs[kind]
-    if not record then
-        return ""
-    end
-
-    local time = system.getTime()
-    local elapsed = time - record.time
-    if elapsed > record.expiry then
-        record.message = ""
-        self.lastLogTime = time
-    end
-
-    return record.message
-end
-
-function Module:getLastLogTime(checking)
-    if checking then
-        local logs = self.logs
-        local time = system.getTime()
-        local changed = false
-        for i,log in ipairs(checking) do
-            local record = logs[log]
-            if record then
-                local elapsed = time - record.time
-                if elapsed > record.expiry then
-                    record.message = ""
-                    changed = true
-                end
-            end
-        end
-
-        if changed then
-            self.lastLogTime = time
-        end
-    end
-
-    return self.lastLogTime
-end
-
-function Module:setLog(kind, message, expiry)
-    local logs = self.logs
-    if not logs then
-        logs = {}
-        self.logs = logs
-    end
-    
-    local time = system.getTime()
-    self.lastLogTime = time
-    logs[kind] = { message = message, time = time, expiry = expiry or 5 }
-end
-
-function Module:log(msg, ...)
-    self:setLog("log", msg:format(...))
-end
-
-function Module:log2(msg, ...)
-    self:setLog("log2", msg:format(...))
-end
-
-function Module:error(msg, ...)
-    self:setLog("error", msg:format(...))
-end
-
-function Module:warning(msg, ...)
-    self:setLog("warning", msg:format(...))
-end
-
 
 function Module:addWindow(window)
     table.insert(self.windows, window)
