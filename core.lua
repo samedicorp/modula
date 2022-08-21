@@ -16,6 +16,7 @@ function ModulaCore.new(system, library, player, construct, unit, settings)
         moduleIndex = {},
         actions = {},
         elements = {},
+        services = {},
         state = {},
         useLocal = settings.useLocal or false,
         logging = settings.logging or false,
@@ -30,6 +31,7 @@ function ModulaCore.new(system, library, player, construct, unit, settings)
     instance:setupGlobals(system, library, player, construct, unit)
     instance:setupHandlers()
     instance:registerModules()
+    instance:registerActions(settings.actions or {})
 
     debug("Initialised Modula Core")
 
@@ -50,7 +52,7 @@ function ModulaCore:setupHandlers()
         onActionStop = {},
         onUpdate = {},
         onFlush = {},
-        onInput = {}
+        onInput = { self }
     }
 end
 
@@ -91,6 +93,18 @@ end
 
 function ModulaCore:onStart()
     self:loadElements()
+end
+
+function ModulaCore:onInput(text)
+    local words = {}
+    for word in text:gmatch("%S+") do
+        print(word)
+        table.insert(words, word)
+    end
+
+    if words[1] == "version" then
+        print("Version %s", self.version)
+    end
 end
 
 -- ---------------------------------------------------------------------
@@ -134,6 +148,8 @@ function ModulaCore:loadModule(name)
         local loaderName = name:gsub("[.-]", "_")
         local loader = _G[string.format("MODULE_%s", loaderName)]
         module = loader()
+    else
+        debug("Using local module %s", name)
     end
 
     if module then
@@ -218,6 +234,158 @@ function ModulaCore:withElements(category, action)
     end
 end
 
+
+-- ---------------------------------------------------------------------
+-- Input
+-- ---------------------------------------------------------------------
+
+function ModulaCore:registerActions(config)
+    for k,entry in pairs(config) do
+        entry.start = entry.start or entry.loop or entry.onoff or entry.all
+        entry.loop = entry.loop or entry.all
+        entry.stop = entry.stop or entry.onoff or entry.all
+        entry.startTime = 0
+        entry.loopTime = 0
+        entry.module = self.services[entry.target]
+    end
+    self.actions = config
+end
+
+function ModulaCore:action(action, mode)
+    local entry = self.actions[action]
+    if entry then
+        local module = entry.module
+        if module then
+            local handler = entry[mode]
+            local time = system.getTime()
+            if mode == "start" then
+                entry.startTime = time
+                entry.loopTime = time
+                entry.longDone = false
+
+            elseif mode == "loop" then
+                if entry.longDone then
+                    return
+                end
+
+                local elapsed = (time - entry.startTime)
+                if entry.long and (elapsed > self._longPressTime) then
+                    -- do the long press if enough time has elapsed
+                    handler = entry.long
+                    entry.longDone = true
+                
+                elseif (time - entry.loopTime) < self._loopRepeat then
+                    -- if not enough time has passed yet, skip this loop iteration
+                    return
+                end
+
+                entry.loopTime = time
+
+            else
+                if entry.long and entry.longDone then
+                    -- skip the stop action if the long press has been done
+                    return
+                end
+            end
+
+            if handler then
+                local status, error = pcall(module[handler], module, mode, entry.arg, action)
+                if not status then
+                    debug("%s %s crashed: %s %s %s", entry.target, handler, mode, action, error)
+                end
+            end
+            return
+        end
+    end
+
+    if self.logActions then
+        debug("%s %s no handler", action, mode)
+    end
+end
+
+function ModulaCore:adjust(delta, mode, action)
+    local time = system.getTime()
+    local shouldUpdate = true
+    if mode == "loop" then
+        local lastTime = self._adjustTimes[action] or 0
+        shouldUpdate = (time - lastTime) > self._adjustRepeat
+    end
+
+    if shouldUpdate then
+        action(delta)
+        self._adjustTimes[action] = time            
+    end
+end
+
+function ModulaCore:perform(module, mode, shortAction, longAction)
+    local data = self._performData or {}
+    local name = module.class
+    if mode == ActionMode.start then
+        data[name] = system.getTime()
+    elseif mode == ActionMode.loop then
+        local elapsed = system.getTime() - data[name]
+        if elapsed > 0.5 then
+            longAction(module)
+            data[name] = nil
+        end
+    else
+        if data[name] then
+            shortAction(module)
+            data[name] = nil
+        end
+    end
+    self._performData = data
+end
+
+-- ---------------------------------------------------------------------
+-- Settings
+-- ---------------------------------------------------------------------
+
+function ModulaCore:gotSettings()
+    return self.settings ~= nil
+end
+
+function ModulaCore:loadString(key)
+    if self.settings then
+        return self.settings.getStringValue(key)
+    end
+end
+
+function ModulaCore:loadInt(key)
+    if self.settings then
+        return self.settings.getIntValue(key)
+    end
+end
+
+function ModulaCore:loadBool(key)
+    if self.settings then
+        return self.settings.getIntValue(key) == 1
+    end
+end
+
+function ModulaCore:saveString(key, value)
+    if self.settings then
+        self.settings.setStringValue(key, value)
+    end
+end
+
+function ModulaCore:saveInt(key, value)
+    if self.settings then
+        self.settings.setIntValue(key, value)
+    end
+end
+
+function ModulaCore:saveBool(key, value)
+    if self.settings then
+        if value then
+            value = 1
+        else
+            value = 0
+        end
+        self.settings.setIntValue(key, value)
+    end
+end
+
 -- ---------------------------------------------------------------------
 -- Internal
 -- ---------------------------------------------------------------------
@@ -278,19 +446,6 @@ function ModulaCore:setupGlobals(system, library, player, construct, unit)
     _G.htmlEscape = function(item)
         return tostring(item):gsub("&", "&amp;"):gsub("<","&lt;"):gsub(">", "&gt;"):gsub("\n", "<br>")
     end
-end
-
-function ModulaCore:testPrint()
-    print(1)
-    print(1.24)
-    print(true)
-    print("test")
-    print({foo = {wibble = "bar"}})
-
-    debug("debug")
-    warning("warning")
-    log("logged")
-    fail("failure")
 end
 
 return ModulaCore
