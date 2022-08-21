@@ -49,6 +49,20 @@ If you want a different style of altimeter, you simply replace the altimeter mod
 
 When the script is finally packed up for distribution, only the code for the modules that were used is actually included.
 
+## Core
+
+The core is the glue that holds everything else together. It:
+
+- loads and registers modules
+- handles all events from DU, and sends them out to any module that has registered an interest
+- detects all elements connected to the construct, in a way that makes it easy for a module to access the ones it needs.
+- tracks the state of the keyboard and sends actions to modules in a clean way
+- provides various utility scripts
+
+With the exception of `unit.onStart`, all of the event handlers that are actually registered in DU are just stubs which call on to the core (the `unit.onStart` handler is a little more complex, as it is the one that sets up the core).
+
+
+
 ## Example
 
 For an example script, see [this project](https://github.com/samedicorp/modula-test).
