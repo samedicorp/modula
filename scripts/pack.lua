@@ -1,11 +1,8 @@
 require('lfs')
+require("configure")
 
 local root = arg[1]
-
 local source = {}
-local modules = {}
-
-require("configure")
 local config = modulaSettings
 
 function lastPathComponent(path)
@@ -35,19 +32,9 @@ function save(path, text, mode)
     end
 end
 
-function iterateFiles(path, action)
-    for file in lfs.dir(path) do
-      if not ((file == '.') or (file == '..')) then
-        local index = file:find("[.]") or #file
-        local name = file:sub(1, index - 1)
-        local extension = file:sub(index)
-        action(name, extension, path .. "/" .. file)
-      end
-    end
-  end
-
 function appendSource(path, name)
-    local code = "\n" .. load(path)
+  print(string.format("Loaded %s.", name))
+  local code = "\n" .. load(path)
     local stripped = code:gsub("%-%- .-\n", "\n")
     table.insert(source, string.format("function MODULE_%s()\n", name))
     table.insert(source, stripped)
@@ -81,8 +68,15 @@ function indented(string, indent)
     return string:gsub("\n", "\n" .. indent)
 end
 
-source = {}
+function writeTemplate(format, ...)
+  local path = string.format("%sautoconf/custom/%s.%s", root, config.name, format)
+  local template = load(string.format("%ssamedicorp/modula/templates/packed.%s", root, format))
+  save(path, string.format(template, ...))
+  print(string.format("Exported %s.%s", config.name, format))
+end
 
+
+print(string.format("Building %s", config.name))
 appendSource(root .. "samedicorp/modula/core.lua", "core")
 scanModules(root, "samedicorp", "", config.modules)
 
@@ -94,22 +88,8 @@ local moduleSource = table.concat(source, "\n")
 local moduleEscaped = jsonEscaped(moduleSource)
 local moduleIndented = indented(moduleSource, "        ")
 
-local outputPath = root .. "autoconf/custom/"
--- local luaPath = outputPath .. config.name .. ".lua"
--- local luaTemplate = load(root .. "samedicorp/modula/templates/packed.lua")
--- save(luaPath, string.format(luaTemplate, moduleSource, configSource))
-
-local jsonPath = outputPath .. config.name .. ".json"
-local jsonTemplate = load(root .. "samedicorp/modula/templates/packed.json")
-save(jsonPath, string.format(jsonTemplate, configEscaped, config.name, moduleEscaped))
-
-local confPath = outputPath .. config.name .. ".conf"
-local confTemplate = load(root .. "samedicorp/modula/templates/packed.conf")
-save(confPath, string.format(confTemplate, config.name, configIndented, moduleIndented))
+-- writeTemplate("lua", moduleSource, configSource)
+writeTemplate("json", configEscaped, config.name, moduleEscaped)
+writeTemplate("conf", config.name, configIndented, moduleIndented)
 
 print("Done.")
-
--- TODO
--- Make config a dictionary.
--- Pass config name or dictionary to core controller.
--- Store modules in global so that handlers can access them with `modules.panels.xx` etc.
