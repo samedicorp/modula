@@ -54,10 +54,6 @@ function appendSource(path, name)
     table.insert(source, string.format("end -- MODULE_%s\n", name))
 end
 
-function moduleName(name)
-    return string.format("%sModule", name:firstToUpper())
-end
-
 function scanModules(root, path, prefix, modules)
     for name, parameters in pairs(modules) do
         local path = root .. name:gsub("[.]", "/") .. ".lua"
@@ -81,6 +77,9 @@ function jsonEscaped(string)
     return string:gsub("\\", "\\\\"):gsub("\n", "\\n"):gsub("\"", "\\\"")
 end
 
+function indented(string, indent)
+    return string:gsub("\n", "\n" .. indent)
+end
 
 source = {}
 
@@ -89,9 +88,11 @@ scanModules(root, "samedicorp", "", config.modules)
 
 local configSource = load("configure.lua")
 local configEscaped = jsonEscaped(configSource)
+local configIndented = indented(configSource, "        ")
 
 local moduleSource = table.concat(source, "\n")
 local moduleEscaped = jsonEscaped(moduleSource)
+local moduleIndented = indented(moduleSource, "        ")
 
 local outputPath = root .. "autoconf/custom/"
 -- local luaPath = outputPath .. config.name .. ".lua"
@@ -104,7 +105,7 @@ save(jsonPath, string.format(jsonTemplate, configEscaped, config.name, moduleEsc
 
 local confPath = outputPath .. config.name .. ".conf"
 local confTemplate = load(root .. "samedicorp/modula/templates/packed.conf")
-save(confPath, string.format(confTemplate, config.name, configSource, moduleSource))
+save(confPath, string.format(confTemplate, config.name, configIndented, moduleIndented))
 
 print("Done.")
 

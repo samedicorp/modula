@@ -9,6 +9,8 @@ ModulaCore = {
 function ModulaCore.new(system, library, player, construct, unit, settings)
     settings = settings or {}
     local instance = {
+        _name = "core",
+        _constructName = settings.name or "Untitled Construct",
         _modules = settings.modules or {},
         _moduleNames = {},
         _moduleIndex = {},
@@ -59,7 +61,7 @@ function ModulaCore:call(handler, ...)
     end
 
     for i,o in pairs(objects) do
-        print("calling %s on %s", handler, o.class)
+        print("calling %s on %s", handler, o.name)
         local func = o[handler]
         local status, failure = pcall(func, o, ...)
         if not status then
@@ -122,11 +124,11 @@ end
 function ModulaCore:loadModule(name)
     local module
 
-    if not self._skipLocal then
-        local loaderName = name:gsub("[.]", "_")
+    -- if not self._skipLocal then
+        local loaderName = name:gsub("[.-]", "_")
         local loader = _G[string.format("MODULE_%s", loaderName)]
         module = loader()
-    end
+    -- end
 
     if not module then module = require(string.format(name)) end
 
