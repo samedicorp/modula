@@ -28,7 +28,9 @@ function ModulaCore.new(system, library, player, construct, unit, settings)
         logCalls = settings.logCalls or false,
         logActions = settings.logActions or false,
         timers = {},
-        handlers = {}
+        handlers = {},
+        loopRepeat = 0.6,
+        longPressTime = 0.5,
     }
 
     setmetatable(instance, {__index = ModulaCore})
@@ -305,7 +307,7 @@ function ModulaCore:dispatchAction(action, mode)
         local module = entry.module
         if module then
             local handler = entry[mode]
-            local time = system.getTime()
+            local time = system.getArkTime()
             if mode == "start" then
                 entry.startTime = time
                 entry.loopTime = time
