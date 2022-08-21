@@ -19,8 +19,6 @@ function Module:register(modula, parameters)
 end
 
 function Module:onStart()
-    debug("Display module started.")
-
     self:addPanel("default", "Display", true)
     self.html = [[<style>
     :root {
@@ -69,6 +67,7 @@ function Module:onStop()
     self.widgetRecords = {}
     self.datas = {}
     self.panel = nil
+    debug("Display manager stopped.")
 end
 
 function Module:onFastUpdate()
@@ -77,21 +76,21 @@ function Module:onFastUpdate()
     -- local core = controller:getCore()
 
     self.modula:call("onDisplayUpdate", self)
-    -- self:updateMenus()
+    -- -- self:updateMenus()
 
-    -- self.frame = self.frame + 1
+    -- -- self.frame = self.frame + 1
 
-    if self.screenDirty then
-        -- debug("%s built screen", self.frame)
-        self:buildScreen()
-        if self.screen ~= self.currentScreen then
-            self.currentScreen = self.screen
-            system.setScreen(self.screen)
-        else
-            debug("%s no change after screen rebuild", self.frame)
-        end
-        self.screenDirty = false
-    end
+    -- if self.screenDirty then
+    --     -- debug("%s built screen", self.frame)
+    --     self:buildScreen()
+    --     if self.screen ~= self.currentScreen then
+    --         self.currentScreen = self.screen
+    --         system.setScreen(self.screen)
+    --     else
+    --         debug("%s no change after screen rebuild", self.frame)
+    --     end
+    --     self.screenDirty = false
+    -- end
 end
 
 function Module:addWindow(window)
