@@ -239,7 +239,7 @@ function ModulaCore:loadElements()
     if cores and (#cores > 0) then
         self.core = cores[1]
     else
-        error("Core not found. Need to link the core to the controller.")
+        warning("Core not found. Need to link the core to the controller.")
     end
 
     self.elements = elements
@@ -436,7 +436,7 @@ function ModulaCore:saveBool(key, value)
 end
 
 -- ---------------------------------------------------------------------
--- Internal
+-- Global Helpers
 -- ---------------------------------------------------------------------
 
 function ModulaCore:setupGlobals(system, library, player, construct, unit)
@@ -458,14 +458,16 @@ function ModulaCore:setupGlobals(system, library, player, construct, unit)
         end
     end
 
+    local basePrint = _G.print or system.print
+
     _G.print = function(format, ...)
         local t = type(format)
 
         if type(format) == "string" then
-            system.print(format:format(...))
+            basePrint(format:format(...))
         else
-            system.print(toString(format))
-            for i, a in ipairs({...}) do system.print(toString(a)) end
+            basePrint(toString(format))
+            for i, a in ipairs({...}) do basePrint(toString(a)) end
         end
     end
 
