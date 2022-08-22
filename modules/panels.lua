@@ -5,12 +5,12 @@
 
 local Module = {}
 local Widget = {}
+local Panel = {}
 
 function Module:register(modula, parameters)
     modula:registerForEvents({"onStart", "onStop", "onFastUpdate"}, self)
     modula:registerService("panels", self)
 
-    self.widgetRecords = {}
     self.panels = {}
 end
 
@@ -20,18 +20,11 @@ function Module:onStart()
 end
 
 function Module:onStop()
-    for name,widget in pairs(self.widgetRecords) do
-        if widget.id then
-            system.destroyWidget(widget.id)
-        end
-        system.destroyData(widget.data)
+    for name,panel in pairs(self.panels) do
+        panel:hide()
     end
 
-    system.destroyWidgetPanel(self.panel)
-
-    self.widgetRecords = {}
-    self.datas = {}
-    self.panel = nil
+    self.panels = {}
     debug("Panel manager stopped.")
 end
 
@@ -39,43 +32,36 @@ function Module:onFastUpdate()
     self.modula:call("onWidgetUpdate", self)
 end
 
-function Module:panelDebug(text, ...)
-        --debug(text, ...)
-end
-
 function Module:addPanel(name, title, startHidden)
-    self:panelDebug("adding panel %s as %s", name, title)
     local panel = { name = name, widgets = {}, title = title }
+    setmetatable(panel, { __index = Panel })
     self.panels[name] = panel
     if not startHidden then
-        self:showPanel(name)
+        panel:show()
     end
+    return panel
 end
 
-function Module:showPanel(name)
-    self:panelDebug("show panel %s", name)
-    local panel = self.panels[name]
-    if not panel.id then
-        panel.id = system.createWidgetPanel(panel.title)
-        self:panelDebug("created panel %s id: %s", name, panel.id)
-        for i,widget in ipairs(panel.widgets) do
-            self:showWidget(widget)
+function Panel:show()
+    if not self.id then
+        self.id = system.createWidgetPanel(self.title)
+        for i,widget in ipairs(self.widgets) do
+            widget:show()
         end
     end
 end
 
-function Module:hidePanel(name)
-    local panel = self.panels[name]
-    if panel.id then
-        for i,widget in ipairs(panel.widgets) do
-            self:hideWidget(widget)
+function Panel:hide()
+    if self.id then
+        for i,widget in ipairs(self.widgets) do
+            widget:hide()
         end
-        system.destroyWidgetPanel(panel.id)
-        panel.id = nil
+        system.destroyWidgetPanel(self.id)
+        self.id = nil
     end
 end
 
-function Module:addWidgets(panel, widgets)
+function Panel:addWidgets(widgets)
     local added = {}
     for name,widget in pairs(widgets) do
         if widget.label or widget.unit then
@@ -83,7 +69,7 @@ function Module:addWidgets(panel, widgets)
         else
             widget.type = "text"
         end
-        local record = self:addWidget(name, widget.type, panel)
+        local record = self:addWidget(name, widget.type)
         added[name] = record
         for k,v in pairs(widget) do
             record[k] = v
@@ -95,42 +81,32 @@ function Module:addWidgets(panel, widgets)
     return added
 end
 
-function Module:addWidget(name, type, panelName, data)
-    self:panelDebug("adding widget %s for panel %s", name, panelName)
-    local panel = self.panels[panelName]
-    if not panel then
-        self:panelDebug("panel %s missing - using default", panelName)
-        panel = self.panels["default"]
-    end
-
-    local widget = { name = name, type = type, data = data, panel = panel }
+function Panel:addWidget(name, type, data)
+    local widget = { name = name, type = type, data = data, panel = self }
     setmetatable(widget, { __index = Widget })
 
-    self:showWidget(widget)
-    self.widgetRecords[name] = widget
-    table.insert(panel.widgets, widget)
+    table.insert(self.widgets, widget)
+    widget:show()
     return widget
 end
 
-function Module:showWidget(widget)
-    self:panelDebug("showing widget %s for panel %s %s", widget.name, widget.panel.name, widget.panel.id)
-    if not widget.id then
-        widget.id = system.createWidget(widget.panel.id, widget.type)
-        self:panelDebug("created widget %s for panel %s", widget.id, widget.panel.id)
-        if widget.data then
-            system.addDataToWidget(widget.data, widget.id)
-        end
+function Widget:show()
+    if not self.id then
+        self.id = system.createWidget(self.panel.id, self.type)
+        if self.data then
+            system.addDataToWidget(self.data, self.id)
+       end
     end
 end
 
-function Module:hideWidget(widget)
-    if widget.id then
-        system.destroyWidget(widget.id)
-        widget.id = nil
+function Widget:hide()
+    if self.id then
+        system.destroyWidget(self.id)
+        self.id = nil
     end
-    if widget.data then
-        system.destroyData(widget.data)
-        widget.data = nil
+    if self.data then
+        system.destroyData(self.data)
+        self.data = nil
     end
 end
 
