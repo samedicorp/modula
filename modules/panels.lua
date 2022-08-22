@@ -35,26 +35,7 @@ function Module:onStop()
 end
 
 function Module:onFastUpdate()
-    -- local flight = self.flight
-    -- local controller = self.controller
-    -- local core = controller:getCore()
-
-    self.modula:call("onDisplayUpdate", self)
-    -- -- self:updateMenus()
-
-    -- -- self.frame = self.frame + 1
-
-    -- if self.screenDirty then
-    --     -- debug("%s built screen", self.frame)
-    --     self:buildScreen()
-    --     if self.screen ~= self.currentScreen then
-    --         self.currentScreen = self.screen
-    --         system.setScreen(self.screen)
-    --     else
-    --         debug("%s no change after screen rebuild", self.frame)
-    --     end
-    --     self.screenDirty = false
-    -- end
+    self.modula:call("onWidgetUpdate", self)
 end
 
 function Module:panelDebug(text, ...)
@@ -130,64 +111,62 @@ function Module:hideWidget(widget)
     end
 end
 
-function Module:addWidgets(panel, type, widgets)
-    for i,widget in ipairs(widgets) do
-            self:addWidget(widget, type, panel)
-    end
-end
-
-function Module:addWidgetsT(panel, type, widgets)
-    for i,widget in ipairs(widgets) do
-        local record = self:addWidget(widget.name, type, panel)
+function Module:addWidgets(panel, widgets, type)
+    local added = {}
+    for name,widget in pairs(widgets) do
+        widget.type = widget.type or type
+        local record = self:addWidget(name, widget.type, panel)
+        added[name] = record
         for k,v in pairs(widget) do
             record[k] = v
         end
+        if widget.value then
+            self:updateWidget(widget, widget.value)
+        end
+    end
+    return added
+end
+
+function Module:updateWidget(widget, ...)
+    if widget.type == "text" then
+        self:updateWidgetText(widget, ...)
+    elseif widget.type == "value" then
+        self:updateWidgetValue(widget, ...)
     end
 end
 
+function Module:updateWidgetText(widget, text, ...)
+    local json = string.format('{"text": "%s "}', string.format(text, ...))
+    if not widget.data then
+        widget.data = system.createData(json)
+        if widget.id then
+            system.addDataToWidget(widget.data, widget.id)
+        end
+        self:panelDebug("created text data for %s %s", name, text)
+    else
+        system.updateData(widget.data, json)
+        self:panelDebug("updated text data for %s name %s", name, text)
+    end
+end
 
-function Module:updateWidgetText(name, text, ...)
-    local widget = self.widgetRecords[name]
-    if widget then
-        local json = string.format('{"text": "%s "}', string.format(text, ...))
-        if not widget.data then
-            widget.data = system.createData(json)
-            if widget.id then
-                system.addDataToWidget(widget.data, widget.id)
-            end
-            self:panelDebug("created text data for %s %s", name, text)
-        else
-            system.updateData(widget.data, json)
-            self:panelDebug("updated text data for %s name %s", name, text)
+function Module:updateWidgetValue(widget, value)
+    local json = string.format('{"label": "%s ", "value": "%s", "unit": "%s"}', widget.label, value, widget.units)
+    if not widget.data then
+        widget.data = system.createData(json)
+        if widget.id then
+            system.addDataToWidget(widget.data, widget.id)
         end
     else
-        self:panelDebug("missing widget %s", name)
+        system.updateData(widget.data, json)
     end
 end
 
-function Module:updateWidgetValue(name, value)
-    local widget = self.widgetRecords[name]
-    if widget then
-       local json = string.format('{"label": "%s ", "value": "%s", "unit": "%s"}', widget.label, value, widget.units)
-        if not widget.data then
-            widget.data = system.createData(json)
-            if widget.id then
-                system.addDataToWidget(widget.data, widget.id)
-            end
-        else
-            system.updateData(widget.data, json)
-        end
-    else
-        self:panelDebug("missing widget %s", name)
-    end
+function Module:updateWidgetFloat(widget, value)
+    self:updateWidgetValue(widget, string.format("%.2f", value))
 end
 
-function Module:updateWidgetFloat(name, value)
-    self:updateWidgetValue(name, string.format("%.2f", value))
-end
-
-function Module:updateWidgetVector(name, value)
-    self:updateWidgetValue(name, string.format("%+.1f %+.1f %+.1f", value.x, value.y, value.z))
+function Module:updateWidgetVector(widget, value)
+    self:updateWidgetValue(widget, string.format("%+.1f %+.1f %+.1f", value.x, value.y, value.z))
 end
 
 function Module:time(seconds)
