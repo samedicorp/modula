@@ -4,6 +4,7 @@
 -- -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 local Module = {}
+local Widget = {}
 
 function Module:register(modula, parameters)
     modula:registerForEvents({"onStart", "onStop", "onFastUpdate"}, self)
@@ -74,6 +75,26 @@ function Module:hidePanel(name)
     end
 end
 
+function Module:addWidgets(panel, widgets)
+    local added = {}
+    for name,widget in pairs(widgets) do
+        if widget.label or widget.unit then
+            widget.type = "value"
+        else
+            widget.type = "text"
+        end
+        local record = self:addWidget(name, widget.type, panel)
+        added[name] = record
+        for k,v in pairs(widget) do
+            record[k] = v
+        end
+        if widget.value then
+            record:update(widget.value)
+        end
+    end
+    return added
+end
+
 function Module:addWidget(name, type, panelName, data)
     self:panelDebug("adding widget %s for panel %s", name, panelName)
     local panel = self.panels[panelName]
@@ -83,6 +104,8 @@ function Module:addWidget(name, type, panelName, data)
     end
 
     local widget = { name = name, type = type, data = data, panel = panel }
+    setmetatable(widget, { __index = Widget })
+
     self:showWidget(widget)
     self.widgetRecords[name] = widget
     table.insert(panel.widgets, widget)
@@ -111,65 +134,52 @@ function Module:hideWidget(widget)
     end
 end
 
-function Module:addWidgets(panel, widgets, type)
-    local added = {}
-    for name,widget in pairs(widgets) do
-        widget.type = widget.type or type
-        local record = self:addWidget(name, widget.type, panel)
-        added[name] = record
-        for k,v in pairs(widget) do
-            record[k] = v
-        end
-        if widget.value then
-            self:updateWidget(widget, widget.value)
-        end
-    end
-    return added
-end
 
-function Module:updateWidget(widget, ...)
-    if widget.type == "text" then
-        self:updateWidgetText(widget, ...)
-    elseif widget.type == "value" then
-        self:updateWidgetValue(widget, ...)
+function Widget:update(...)
+    if self.type == "text" then
+        self:updateText(...)
+    elseif self.type == "value" then
+        self:updateValue(...)
     end
 end
 
-function Module:updateWidgetText(widget, text, ...)
+function Widget:updateText(text, ...)
     local json = string.format('{"text": "%s "}', string.format(text, ...))
-    if not widget.data then
-        widget.data = system.createData(json)
-        if widget.id then
-            system.addDataToWidget(widget.data, widget.id)
+    if not self.data then
+        self.data = system.createData(json)
+        if self.id then
+            system.addDataToWidget(self.data, self.id)
         end
-        self:panelDebug("created text data for %s %s", name, text)
     else
-        system.updateData(widget.data, json)
-        self:panelDebug("updated text data for %s name %s", name, text)
+        system.updateData(self.data, json)
     end
 end
 
-function Module:updateWidgetValue(widget, value)
-    local json = string.format('{"label": "%s ", "value": "%s", "unit": "%s"}', widget.label, value, widget.units)
-    if not widget.data then
-        widget.data = system.createData(json)
-        if widget.id then
-            system.addDataToWidget(widget.data, widget.id)
+function Widget:updateValue(value)
+    local json = string.format('{"label": "%s ", "value": "%s", "unit": "%s"}', self.label, value, self.units or "")
+    if not self.data then
+        self.data = system.createData(json)
+        if self.id then
+            system.addDataToWidget(self.data, self.id)
         end
     else
-        system.updateData(widget.data, json)
+        system.updateData(self.data, json)
     end
 end
 
-function Module:updateWidgetFloat(widget, value)
-    self:updateWidgetValue(widget, string.format("%.2f", value))
+function Widget:updateFloat(value)
+    self:updateValue(string.format("%.2f", value))
 end
 
-function Module:updateWidgetVector(widget, value)
-    self:updateWidgetValue(widget, string.format("%+.1f %+.1f %+.1f", value.x, value.y, value.z))
+function Widget:updateVector(value)
+    self:updateValue(string.format("%+.1f %+.1f %+.1f", value.x, value.y, value.z))
 end
 
-function Module:time(seconds)
+function Widget:updateTime(value)
+    self:update(self:time(value))
+end
+
+function Widget:time(seconds)
     local hours = math.floor(seconds / 3600)
     seconds = seconds - hours*3600
     local mins = math.floor(seconds / 60)
