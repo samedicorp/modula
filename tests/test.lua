@@ -1,13 +1,16 @@
 luaunit = require('luaunit')
 
-_G.error = function(format, ...)
+function error(format, ...)
     print("ERROR: %s", format:format(...))
     luaunit.assertTrue(false)
 end
 
+system = {
+    print = print
+}
 
 function test_core()
-    local system, library, player, construct, unit
+    local library, player, construct, unit
     local settings = {}
     local prototype = require('core')
     local core = prototype.new(system, library, player, construct, unit, settings)
