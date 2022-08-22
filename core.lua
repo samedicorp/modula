@@ -180,7 +180,9 @@ end
 -- ---------------------------------------------------------------------
 
 function ModulaCore:registerModules()
-    for module, parameters in pairs(self.modules or {}) do
+    local modules = self.modules or {}
+    self.modules = {}
+    for module, parameters in pairs(modules) do
         self:registerModule(module, parameters)
     end
 end
@@ -200,15 +202,16 @@ function ModulaCore:registerModule(name, parameters)
     else
         warning("Can't find module %s", name)
     end
-    return module
 end
 
 function ModulaCore:loadModule(name)
     local module
 
+    print(name)
+    
     if self.useLocal then 
         -- prefer local source version if it is present
-        module = require(string.format(name)) 
+        module = require(name) 
     end
 
     if module then
@@ -458,16 +461,14 @@ function ModulaCore:setupGlobals(system, library, player, construct, unit)
         end
     end
 
-    local basePrint = _G.print or system.print
-
     _G.print = function(format, ...)
         local t = type(format)
 
         if type(format) == "string" then
-            basePrint(format:format(...))
+            system.print(format:format(...))
         else
-            basePrint(toString(format))
-            for i, a in ipairs({...}) do basePrint(toString(a)) end
+            system.print(toString(format))
+            for i, a in ipairs({...}) do system.print(toString(a)) end
         end
     end
 
