@@ -8,14 +8,13 @@ local Widget = {}
 local Panel = {}
 
 function Module:register(modula, parameters)
-    modula:registerForEvents({"onStart", "onStop", "onFastUpdate"}, self)
+    modula:registerForEvents({"onStart", "onStop"}, self)
     modula:registerService("panels", self)
 
     self.panels = {}
 end
 
 function Module:onStart()
-    self:addPanel("default", "Display", true)
     debug("Panel manager running.")
 end
 
@@ -28,8 +27,8 @@ function Module:onStop()
     debug("Panel manager stopped.")
 end
 
-function Module:onFastUpdate()
-    self.modula:call("onWidgetUpdate", self)
+function Module:panelNamed(name)
+    return self.panels[name]
 end
 
 function Module:addPanel(name, title, startHidden)
@@ -109,7 +108,6 @@ function Widget:hide()
         self.data = nil
     end
 end
-
 
 function Widget:update(...)
     if self.type == "text" then

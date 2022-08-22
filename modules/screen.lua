@@ -46,7 +46,7 @@ function Module:onStart()
 
     system.showScreen(1)
 
-    debug("Display manager running.")
+    debug("Screen manager running.")
 end
 
 function Module:onStop()
@@ -59,7 +59,7 @@ function Module:onFastUpdate()
     -- local controller = self.controller
     -- local core = controller:getCore()
 
-    self.modula:call("onDisplayUpdate", self)
+   -- self.modula:call("onDisplayUpdate", self)
     -- -- self:updateMenus()
 
     -- -- self.frame = self.frame + 1
@@ -77,37 +77,37 @@ function Module:onFastUpdate()
     -- end
 end
 
-function Module:addWindow(window)
-    table.insert(self.windows, window)
-    self.screenDirty = true
-end
+-- function Module:addWindow(window)
+--     table.insert(self.windows, window)
+--     self.screenDirty = true
+-- end
 
-function Module:updateWindow(window, content)
-    local old = window.content
-    window.content = content
-    local contentChanged = content ~= old
-    if contentChanged then
-        -- debug("%s window %s content changed", self.frame, window.name)
-    end
-    self.screenDirty = self.screenDirty or contentChanged
-end
+-- function Module:updateWindow(window, content)
+--     local old = window.content
+--     window.content = content
+--     local contentChanged = content ~= old
+--     if contentChanged then
+--         -- debug("%s window %s content changed", self.frame, window.name)
+--     end
+--     self.screenDirty = self.screenDirty or contentChanged
+-- end
 
-function Module:buildScreen()
+-- function Module:buildScreen()
  
-    local html = { self.html }
+--     local html = { self.html }
 
-    for i,window in ipairs(self.windows) do
-        local style = {}
-        for k,v in pairs(window) do
-            if (k ~= "content") and (k ~= "name") and (k ~= "html")and (k ~= "style") then
-                table.insert(style, string.format("%s: %s", k, v))
-            end
-        end
+--     for i,window in ipairs(self.windows) do
+--         local style = {}
+--         for k,v in pairs(window) do
+--             if (k ~= "content") and (k ~= "name") and (k ~= "html")and (k ~= "style") then
+--                 table.insert(style, string.format("%s: %s", k, v))
+--             end
+--         end
 
-        table.insert(html, string.format('<div class="samedi-window" style="%s">%s</div>', table.concat(style, ";"), window.content))
-    end
+--         table.insert(html, string.format('<div class="samedi-window" style="%s">%s</div>', table.concat(style, ";"), window.content))
+--     end
 
-    self.screen = table.concat(html, "\n")
-end
+--     self.screen = table.concat(html, "\n")
+-- end
 
 return Module
