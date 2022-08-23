@@ -14,6 +14,7 @@ function Module:register(modula, parameters)
     self.windows = {}
     self.frame = 0
     self.html = ""
+    self.logChanges = parameters.logChanges or false
 end
 
 function Module:onStart()
@@ -55,59 +56,56 @@ function Module:onStop()
 end
 
 function Module:onFastUpdate()
-    -- local flight = self.flight
-    -- local controller = self.controller
-    -- local core = controller:getCore()
+   self.modula:call("onUpdateWindow", self)
 
-   -- self.modula:call("onDisplayUpdate", self)
-    -- -- self:updateMenus()
+   self.frame = self.frame + 1
 
-    -- -- self.frame = self.frame + 1
+    if self.screenDirty then
+        if self.logChanges then
+            debugf("%s built screen", self.frame)
+        end
 
-    -- if self.screenDirty then
-    --     -- debug("%s built screen", self.frame)
-    --     self:buildScreen()
-    --     if self.screen ~= self.currentScreen then
-    --         self.currentScreen = self.screen
-    --         system.setScreen(self.screen)
-    --     else
-    --         debug("%s no change after screen rebuild", self.frame)
-    --     end
-    --     self.screenDirty = false
-    -- end
+        self:buildScreen()
+        if self.screen ~= self.currentScreen then
+            self.currentScreen = self.screen
+            system.setScreen(self.screen)
+        elseif self.logChanges then
+            debug("%s no change after screen rebuild", self.frame)
+        end
+        self.screenDirty = false
+    end
 end
 
--- function Module:addWindow(window)
---     table.insert(self.windows, window)
---     self.screenDirty = true
--- end
+function Module:addWindow(window)
+    table.insert(self.windows, window)
+    self.screenDirty = true
+end
 
--- function Module:updateWindow(window, content)
---     local old = window.content
---     window.content = content
---     local contentChanged = content ~= old
---     if contentChanged then
---         -- debug("%s window %s content changed", self.frame, window.name)
---     end
---     self.screenDirty = self.screenDirty or contentChanged
--- end
+function Module:updateWindow(window, content)
+    local old = window.content
+    window.content = content
+    local contentChanged = content ~= old
+    if contentChanged and self.logChanges then
+        debugf("%s window %s content changed", self.frame, window.name)
+    end
+    self.screenDirty = self.screenDirty or contentChanged
+end
 
--- function Module:buildScreen()
- 
---     local html = { self.html }
+function Module:buildScreen()
+    local html = { self.html }
 
---     for i,window in ipairs(self.windows) do
---         local style = {}
---         for k,v in pairs(window) do
---             if (k ~= "content") and (k ~= "name") and (k ~= "html")and (k ~= "style") then
---                 table.insert(style, string.format("%s: %s", k, v))
---             end
---         end
+    for i,window in ipairs(self.windows) do
+        local style = {}
+        for k,v in pairs(window) do
+            if (k ~= "content") and (k ~= "name") and (k ~= "html")and (k ~= "style") then
+                table.insert(style, string.format("%s: %s", k, v))
+            end
+        end
 
---         table.insert(html, string.format('<div class="samedi-window" style="%s">%s</div>', table.concat(style, ";"), window.content))
---     end
+        table.insert(html, string.format('<div class="samedi-window" style="%s">%s</div>', table.concat(style, ";"), window.content))
+    end
 
---     self.screen = table.concat(html, "\n")
--- end
+    self.screen = table.concat(html, "\n")
+end
 
 return Module
