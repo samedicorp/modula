@@ -61,6 +61,51 @@ The core is the glue that holds everything else together. It:
 
 With the exception of `unit.onStart`, all of the event handlers that are actually registered in DU are just stubs which call on to the core (the `unit.onStart` handler is a little more complex, as it is the one that sets up the core).
 
+## Events
+
+Modules can register for events with the Modula core:
+
+```lua
+    modula:registerForEvents({"onStart", "onStop"}, self)
+```
+
+When the event occurs, the corresponding handler on the module will be called. 
+
+Modules can also _generate_ events:
+
+```lua
+    modula:call("onMyEvent", "some parameter")
+```
+
+Any other modules that have registered will be called. 
+
+This ability is useful for modules that need to synchronise their actions with other modules. 
+
+For example, the screen module manages creating html screen content. It calls `onUpdateScreen` to ask other modules to update their content. Any module interested in displaying screen content registers for this event. When a module gets the event, it calls the screen module back to provide some content. The screen module then combines it all into the final screen html.
+
+## Services
+
+Some modules provide services to other modules, but don't do so using events.
+
+These modules can register themselves with the core:
+
+```lua
+    modula:registerService("panels", self)
+```
+
+Any other module that needs the "panels" service can find it, without having to know exactly what module is providing it:
+
+```lua
+    local panels = self.modula:getService("panels")
+```
+
+This provides full decoupling between the service and its implementation. 
+
+Your construct script can be configured to use one implementation of the "panels" service, then changed later to use a different one. As long as both services provide the same API, everything will continue to work.
+
+
+## Actions
+
 
 
 ## Example
