@@ -1,7 +1,8 @@
--- -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+-- -=core.lua-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 --  Created by Samedi on 20/08/2022.
 --  All code (c) 2022, The Samedi Corporation.
--- -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+-- -=core.lua-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
 ModulaCore = {
     class = "ModulaCore"
 }
@@ -82,8 +83,10 @@ function ModulaCore:call(handler, ...)
         local func = o[handler]
         local status, failure = pcall(func, o, ...)
         if not status then
-            failure = failure:gsub('"%-%- |STDERROR%-EVENTHANDLER[^"]*"','chunk'):
-            printf(failure)
+            -- TODO: extract a better error path?
+            -- failure = failure:gsub("\\-\\- -=", "xx")
+            -- failure = failure:gsub('"%-%- |STDERROR%-EVENTHANDLER[^"]*"','chunk'):
+            -- printf(failure)
             fail(failure)
             return failure
         end
@@ -487,6 +490,7 @@ function ModulaCore:setupGlobals(system, library, player, construct, unit)
 
     _G.fail = function(format, ...)
         local message = format:format(...)
+        system.print(message)
         system.showScreen(1)
         system.setScreen(string.format(
                              '<div class="window" style="position: absolute; top="10vh"; left="45vw"; width="10vw"><h1 style="middle">Error</h1><span>%s</span></div>',
