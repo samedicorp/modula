@@ -42,8 +42,6 @@ function ModulaCore.new(system, library, player, construct, unit, settings)
     instance:registerModules()
     instance:registerActions(settings.actions or {})
     instance:loadElements()
-    instance:addTimer("onFastUpdate", 1.0 / 30.0)
-    instance:addTimer("onSlowUpdate", 1.0)
 
     debugf("Initialised Modula Core")
     instance.running = true
@@ -116,6 +114,8 @@ function ModulaCore:registerForEvents(handlers, object)
 end
 
 function ModulaCore:onStart()
+    self:addTimer("onFastUpdate", 1.0 / 30.0)
+    self:addTimer("onSlowUpdate", 1.0)
 end
 
 function ModulaCore:onStop()
