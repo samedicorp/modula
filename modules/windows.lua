@@ -83,7 +83,8 @@ end
 
 function Module:addWindow(window)
     setmetatable(window, { __index = Window })
-    window.data = { screen = self, style = "", content = "", div = "" }
+    window.data = { screen = self, style = "", content = "", div = "", name = window.name or "Untitled" }
+    window.name = nil
     table.insert(self.windows, window)
     self.screenDirty = true
 end
@@ -118,7 +119,7 @@ function Window:update(content)
         data.content = content
         screen.screenDirty = true
         if screen.logChanges then
-            debugf("%s window %s content changed", screen.frame, self.name)
+            debugf("%s window %s content changed", screen.frame, data.name)
         end
     end
 end
