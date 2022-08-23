@@ -207,8 +207,6 @@ end
 function ModulaCore:loadModule(name)
     local module
 
-    print(name)
-    
     if self.useLocal then 
         -- prefer local source version if it is present
         module = require(name) 
