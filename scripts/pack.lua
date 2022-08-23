@@ -73,6 +73,8 @@ function writeTemplate(format, ...)
   local template = load(string.format("%ssamedicorp/modula/templates/packed.%s", root, format))
   save(path, string.format(template, ...))
   print(string.format("Exported %s.%s", config.name, format))
+
+  return path
 end
 
 
@@ -89,7 +91,14 @@ local moduleEscaped = jsonEscaped(moduleSource)
 local moduleIndented = indented(moduleSource, "        ")
 
 -- writeTemplate("lua", moduleSource, configSource)
-writeTemplate("json", configEscaped, config.name, moduleEscaped)
+local jsonPath = writeTemplate("json", configEscaped, config.name, moduleEscaped)
 writeTemplate("conf", config.name, configIndented, moduleIndented)
 
+-- copy the generated json to the clipboard
+local command = string.format('clip.exe < "%s"', jsonPath)
+os.execute(command)
+
 print("Done.")
+
+
+
