@@ -149,6 +149,53 @@ actions = {
     }
 ```
 
+## Existing Modules
+
+### Ported Modules
+- panels: manages panels and widgets
+- windows: allows you to display "windows" to the screen
+
+### UI Modules Which Will Likely Be Ported
+- airspeed
+- altimeter
+- fuel
+- horizon
+- indicators
+- logo
+- status
+- throttle
+
+### Control Modules Which Will Likely Be Ported
+- attitude
+- autogear
+- autohatch
+- autotarget
+- bookmarks
+- braking
+- container
+- debug
+- dynamic
+- flightassist
+- ground
+- impulse
+- industry
+- industrySupport
+- installedSchematics
+- kinematics
+- mining
+- parking
+- radar
+- refinery
+- schematics
+- stabilisation
+- throttle
+- vtol
+- warp
+
+### Other Planned Modules
+
+- notifications: allows you to post notifications which other modules display
+
 
 ## Example
 
