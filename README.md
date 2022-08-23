@@ -106,6 +106,48 @@ Your construct script can be configured to use one implementation of the "panels
 
 ## Actions
 
+For the most part, keyboard handling with modula just requires add some configuration to the `actions` property of the settings.
+
+For each of the actions that you want to handle, you specify a record. 
+
+The `target` property of this record specifies the service name that will be called when the action happens.
+
+The other properties specify the name of the handler to call, and when to call it:
+
+- `start`: calls the named handler on action start
+- `stop`: calls the named handler on action stop
+- `onoff`: calls the named handler on start and stop
+- `loop`: calls the named handler on whilst the action is looping
+- `long`: calls the named handler if the action is long-pressed
+
+Here's a full example:
+
+```lua
+actions = {
+        brake = {
+            target = "test",
+            start = "startTest",
+            stop = "stopTest"
+        },
+
+
+        option1 = {
+            target = "test",
+            onoff = "startStopTest",
+        },
+
+        option2 = {
+            target = "test",
+            loop = "loopTest"
+        },
+
+        gear = {
+            target = "test",
+            stop = "normalPressTest",
+            long = "longPressTest"
+        },
+    }
+```
 
 
 ## Example
