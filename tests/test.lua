@@ -32,13 +32,26 @@ function TestSuite:makeModula(settings)
     return self.modula
 end
 
-function TestSuite:testCore()
+function TestSuite:testCoreLifecycle()
     local modula = self:makeModula({
         logging = true,
         logCalls = true
     })
 
     luaunit.assert_nil(modula:call("onStart"))
+    luaunit.assert_nil(modula:call("onStop"))
+end
+
+function TestSuite:testPanels()
+    local modula = self:makeModula({
+        useLocal = true,
+        modules = {
+            ["modules.panels"] = {}
+        }
+    })
+
+    luaunit.assert_nil(modula:call("onStart"))
+    luaunit.assert_nil(modula:call("onStop"))
 end
 
 local lu = luaunit.LuaUnit.new()
