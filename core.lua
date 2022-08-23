@@ -83,7 +83,7 @@ function ModulaCore:call(handler, ...)
         local status, failure = pcall(func, o, ...)
         if not status then
             failure = failure:gsub('"%-%- |STDERROR%-EVENTHANDLER[^"]*"','chunk'):
-            print(failure)
+            printf(failure)
             fail(failure)
             return failure
         end
@@ -127,7 +127,7 @@ end
 
 function ModulaCore:onCommand(command, arguments)
     if command == "version" then
-        print("%s Version %s (core %s)", self.construct.name, self.construct.version, self.version)
+        printf("%s Version %s (core %s)", self.construct.name, self.construct.version, self.version)
     end
 end
 
@@ -459,7 +459,7 @@ function ModulaCore:setupGlobals(system, library, player, construct, unit)
         end
     end
 
-    _G.print = function(format, ...)
+    _G.printf = function(format, ...)
         local t = type(format)
 
         if type(format) == "string" then
@@ -471,7 +471,7 @@ function ModulaCore:setupGlobals(system, library, player, construct, unit)
     end
 
     if self.logging then
-        _G.trace = _G.print
+        _G.trace = printf
     else
         _G.trace = function(format, ...) end
     end
@@ -482,7 +482,7 @@ function ModulaCore:setupGlobals(system, library, player, construct, unit)
     end
 
     _G.warning = function(format, ...)
-        print("WARNING: %s", format:format(...))
+        printf("WARNING: %s", format:format(...))
     end
 
     _G.fail = function(format, ...)

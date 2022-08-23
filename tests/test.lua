@@ -21,9 +21,19 @@ function TestSuite:setUp()
     end)
 
     _G.system = mockSystem:new()
-    system.print = print
+
+    self.output = ""
+    system.print = function(text)
+        self.output = string.format("%s%s\n", self.output, text)
+    end
+
 
     _G.unit = makeMock("ControlUnit", 2, "programming board")
+end
+
+function TestSuite:tearDown()
+    -- print(self.output)
+    self.output = ""
 end
 
 function TestSuite:makeModula(settings)
@@ -40,10 +50,13 @@ function TestSuite:testCoreLifecycle()
 
     luaunit.assert_nil(modula:call("onStart"))
     luaunit.assert_nil(modula:call("onStop"))
+    luaunit.assert_str_contains(self.output, "calling onStart")
+    luaunit.assert_str_contains(self.output, "calling onStop")
 end
 
 function TestSuite:testPanels()
     local modula = self:makeModula({
+        logging = true,
         useLocal = true,
         modules = {
             ["modules.panels"] = {}
@@ -52,6 +65,8 @@ function TestSuite:testPanels()
 
     luaunit.assert_nil(modula:call("onStart"))
     luaunit.assert_nil(modula:call("onStop"))
+    luaunit.assert_str_contains(self.output, "Panel manager running.")
+    luaunit.assert_str_contains(self.output, "Panel manager stopped")
 end
 
 local lu = luaunit.LuaUnit.new()
