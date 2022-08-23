@@ -1,0 +1,3 @@
+[submodule "du-mocks"]
+	path = du-mocks
+	url = git@github.com:samedicorp/du-mocks
