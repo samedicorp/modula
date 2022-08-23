@@ -46,12 +46,12 @@ function Module:onStart()
 
     system.showScreen(1)
 
-    trace("Screen manager running.")
+    debugf("Screen manager running.")
 end
 
 function Module:onStop()
     system.showScreen(0)
-    trace("Display manager stopped.")
+    debugf("Display manager stopped.")
 end
 
 function Module:onFastUpdate()

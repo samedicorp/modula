@@ -44,7 +44,7 @@ function ModulaCore.new(system, library, player, construct, unit, settings)
     instance:addTimer("onFastUpdate", 1.0 / 30.0)
     instance:addTimer("onSlowUpdate", 1.0)
 
-    trace("Initialised Modula Core")
+    debugf("Initialised Modula Core")
     instance.running = true
 
     return instance
@@ -76,7 +76,7 @@ function ModulaCore:call(handler, ...)
 
     for i,o in pairs(objects) do
         if self.logCalls then
-            trace("calling %s on %s", handler, o.name)
+            debugf("calling %s on %s", handler, o.name)
         end
 
         local func = o[handler]
@@ -95,7 +95,7 @@ function ModulaCore:registerForEvents(handlers, object)
         if not object[handler] then
             warning("Module %s does not have a handler for %s", object.name, handler)
         else
-            trace("Registering %s for event %s", object.name, handler)
+            debugf("Registering %s for event %s", object.name, handler)
             local registered = self.handlers[handler]
             if registered then
                 table.insert(registered, object)
@@ -167,7 +167,7 @@ end
 -- ---------------------------------------------------------------------
 
 function ModulaCore:registerService(name, module)
-    trace("Registered %s as service %s", module.name, name)
+    debugf("Registered %s as service %s", module.name, name)
     self.services[name] = module
 end
 
@@ -190,7 +190,7 @@ end
 function ModulaCore:registerModule(name, parameters)
     local prototype = self:loadModule(name)
     if prototype then
-        trace("Registering module: %s", name)
+        debugf("Registering module: %s", name)
         local module = { modula = self }
         setmetatable(module, { __index = prototype })
 
@@ -213,7 +213,7 @@ function ModulaCore:loadModule(name)
     end
 
     if module then
-        trace("Using local module %s", name)
+        debugf("Using local module %s", name)
     else
         -- try to load module from version stashed in library.onStart
         local loaderName = name:gsub("[.-]", "_")
@@ -250,7 +250,7 @@ function ModulaCore:loadElements()
     self:withElements("ScreenUnit", function(element)
         local id = element.getId()
         if core.getElementNameById(id) == "Console" then
-            trace("Installed console.")
+            debugf("Installed console.")
             self.console = element
         end
     end)
@@ -280,7 +280,7 @@ function ModulaCore:categoriseElements(elements)
     end
 
     if self.logElements then
-        for k, v in pairs(categorised) do trace("Found %s %s.", #v, k) end
+        for k, v in pairs(categorised) do debugf("Found %s %s.", #v, k) end
     end
 
     categorised.all = elements
@@ -375,7 +375,7 @@ function ModulaCore:dispatchAction(action, mode)
                 if func then
                     local status, error = pcall(func, module, mode, entry.arg, action)
                     if not status then
-                        trace("%s %s crashed: %s %s %s", entry.target, handler, mode, action, error)
+                        debugf("%s %s crashed: %s %s %s", entry.target, handler, mode, action, error)
                     end
                 end
             end
@@ -383,7 +383,7 @@ function ModulaCore:dispatchAction(action, mode)
     end
 
     if self.logActions then
-        trace("%s %s no handler", action, mode)
+        debugf("%s %s no handler", action, mode)
     end
 end
 
@@ -471,9 +471,9 @@ function ModulaCore:setupGlobals(system, library, player, construct, unit)
     end
 
     if self.logging then
-        _G.trace = printf
+        _G.debugf = printf
     else
-        _G.trace = function(format, ...) end
+        _G.debugf = function(format, ...) end
     end
 
     _G.log = function(format, ...)
