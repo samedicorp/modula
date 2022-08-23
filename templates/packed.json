@@ -1,275 +1,221 @@
 {
     "slots": {
-        "0": {
-            "name": "slot1",
+        "-1": {
+            "name": "unit",
             "type": {
-                "events": [],
-                "methods": []
+                "methods": [],
+                "events": []
+            }
+        },
+        "-3": {
+            "name": "player",
+            "type": {
+                "methods": [],
+                "events": []
+            }
+        },
+        "-2": {
+            "name": "construct",
+            "type": {
+                "methods": [],
+                "events": []
+            }
+        },
+        "-4": {
+            "name": "system",
+            "type": {
+                "methods": [],
+                "events": []
+            }
+        },
+        "0": {
+            "name": "core",
+            "type": {
+                "methods": [],
+                "events": []
+            }
+        },
+        "-5": {
+            "name": "library",
+            "type": {
+                "methods": [],
+                "events": []
             }
         },
         "1": {
             "name": "slot2",
             "type": {
-                "events": [],
-                "methods": []
+                "methods": [],
+                "events": []
             }
         },
         "2": {
             "name": "slot3",
             "type": {
-                "events": [],
-                "methods": []
+                "methods": [],
+                "events": []
             }
         },
         "3": {
             "name": "slot4",
             "type": {
-                "events": [],
-                "methods": []
+                "methods": [],
+                "events": []
             }
         },
         "4": {
             "name": "slot5",
             "type": {
-                "events": [],
-                "methods": []
+                "methods": [],
+                "events": []
             }
         },
         "5": {
             "name": "slot6",
             "type": {
-                "events": [],
-                "methods": []
+                "methods": [],
+                "events": []
             }
         },
         "6": {
             "name": "slot7",
             "type": {
-                "events": [],
-                "methods": []
+                "methods": [],
+                "events": []
             }
         },
         "7": {
             "name": "slot8",
             "type": {
-                "events": [],
-                "methods": []
+                "methods": [],
+                "events": []
             }
         },
         "8": {
             "name": "slot9",
             "type": {
-                "events": [],
-                "methods": []
+                "methods": [],
+                "events": []
             }
         },
         "9": {
             "name": "slot10",
             "type": {
-                "events": [],
-                "methods": []
-            }
-        },
-        "10": {
-            "name": "slot11",
-            "type": {
-                "events": [],
-                "methods": []
-            }
-        },
-        "11": {
-            "name": "slot12",
-            "type": {
-                "events": [],
-                "methods": []
-            }
-        },
-        "12": {
-            "name": "slot13",
-            "type": {
-                "events": [],
-                "methods": []
-            }
-        },
-        "13": {
-            "name": "slot14",
-            "type": {
-                "events": [],
-                "methods": []
-            }
-        },
-        "14": {
-            "name": "slot15",
-            "type": {
-                "events": [],
-                "methods": []
-            }
-        },
-        "15": {
-            "name": "slot16",
-            "type": {
-                "events": [],
-                "methods": []
-            }
-        },
-        "16": {
-            "name": "slot17",
-            "type": {
-                "events": [],
-                "methods": []
-            }
-        },
-        "17": {
-            "name": "slot18",
-            "type": {
-                "events": [],
-                "methods": []
-            }
-        },
-        "18": {
-            "name": "slot19",
-            "type": {
-                "events": [],
-                "methods": []
-            }
-        },
-        "19": {
-            "name": "slot20",
-            "type": {
-                "events": [],
-                "methods": []
-            }
-        },
-        "20": {
-            "name": "slot21",
-            "type": {
-                "events": [],
-                "methods": []
-            }
-        },
-        "-1": {
-            "name": "unit",
-            "type": {
-                "events": [],
-                "methods": []
-            }
-        },
-        "-2": {
-            "name": "system",
-            "type": {
-                "events": [],
-                "methods": []
-            }
-        },
-        "-3": {
-            "name": "library",
-            "type": {
-                "events": [],
-                "methods": []
+                "methods": [],
+                "events": []
             }
         }
     },
     "handlers": [
         {
-            "code": "if controller then\n    controller:stop()\nend",
+            "key": "0",
             "filter": {
-                "args": [],
-                "signature": "stop()",
-                "slotKey": "-1"
+                "slotKey": "-1",
+                "signature": "onStart()",
+                "args": []
             },
-            "key": "0"
+            "code": "%s\n\n-- Modula auto-generated code begins here.\nlocal modulaCore\nif useLocal then\n    modulaCore = require('samedicorp.modula.core')\nend\n\nif not modulaCore then\n    modulaCore = MODULE_core()\n    system.print(modulaSettings.name .. \" using packed version.\")\nelse\n    system.print(modulaSettings.name .. \" using local development version.\")\nend\n\nmodula = { call = function() end }\n\nlocal status, result = pcall(modulaCore.new, system, library, player, construct, unit, modulaSettings)\nif status then\n  modula = result\n  failure = modula:call(\"onStart\")\nelse\n  modula = { call = function() end }\n  failure = result\nend        \n\nif failure then\n    error(failure)\nend\n"
         },
         {
-            "code": "local devMode = true --export: Use locally installed scripts if present.\nlocal logging = false --export: Enable controller debug output.\nlocal logElements = false --export: Log all discovered elements.\n\n%s\n\nif devMode then\ncontroller = require('samedi.coreController').new(system, unit, library, { logging = logging, logElements = logElements, devMode = true })\ncontroller:run('samedi.configs.%s')\nelse\ncontroller = MODULE_coreController().new(system, unit, library, { logging = logging, logElements = logElements })\ncontroller:run(MODULE_config())\nend",
+            "key": "1",
             "filter": {
-                "args": [],
-                "signature": "start()",
-                "slotKey": "-1"
+                "slotKey": "-1",
+                "signature": "onStop()",
+                "args": []
             },
-            "key": "1"
+            "code": "local failure = modula:call(\"onStop\"); if failure then error(failure) end"
         },
         {
-            "code": "%s",
+            "key": "2",
             "filter": {
-                "args": [],
-                "signature": "start()",
-                "slotKey": "-3"
-            },
-            "key": "1"
-        },
-        {
-            "code": "controller:tick(timerId)",
-            "filter": {
-                "args": [
-                    {
-                        "variable": "*"
-                    }
-                ],
+                "slotKey": "-1",
                 "signature": "tick(timerId)",
-                "slotKey": "-1"
-            },
-            "key": "2"
-        },
-        {
-            "code": "if controller then\n    controller:flush()\nend",
-            "filter": {
-                "args": [],
-                "signature": "flush()",
-                "slotKey": "-2"
-            },
-            "key": "3"
-        },
-        {
-            "code": "controller:input(text)",
-            "filter": {
                 "args": [
                     {
-                        "variable": "*"
+                        "variable": "timerId"
                     }
-                ],
-                "signature": "inputText(text)",
-                "slotKey": "-2"
+                ]
             },
-            "key": "4"
+            "code": "local failure = modula:call(\"onTick\", timerId); if failure then error(failure) end"
         },
         {
-            "code": "controller:action(action, \"stop\")",
+            "key": "3",
             "filter": {
-                "args": [
-                    {
-                        "variable": "*"
-                    }
-                ],
-                "signature": "actionStop(action)",
-                "slotKey": "-2"
-            },
-            "key": "5"
-        },
-        {
-            "code": "controller:action(action, \"loop\")",
-            "filter": {
-                "args": [
-                    {
-                        "variable": "*"
-                    }
-                ],
-                "signature": "actionLoop(action)",
-                "slotKey": "-2"
-            },
-            "key": "6"
-        },
-        {
-            "code": "controller:action(action, \"start\")",
-            "filter": {
-                "args": [
-                    {
-                        "variable": "*"
-                    }
-                ],
+                "slotKey": "-4",
                 "signature": "actionStart(action)",
-                "slotKey": "-2"
+                "args": [
+                    {
+                        "variable": "action"
+                    }
+                ]
             },
-            "key": "7"
+            "code": "local failure = modula:call(\"onActionStart\", action); if failure then error(failure) end"
+        },
+        {
+            "key": "4",
+            "filter": {
+                "slotKey": "-4",
+                "signature": "actionStop(action)",
+                "args": [
+                    {
+                        "variable": "action"
+                    }
+                ]
+            },
+            "code": "local failure = modula:call(\"onActionStop\", action); if failure then error(failure) end"
+        },
+        {
+            "key": "5",
+            "filter": {
+                "slotKey": "-4",
+                "signature": "actionLoop(action)",
+                "args": [
+                    {
+                        "variable": "action"
+                    }
+                ]
+            },
+            "code": "local failure = modula:call(\"onActionLoop\", action); if failure then error(failure) end"
+        },
+        {
+            "key": "6",
+            "filter": {
+                "slotKey": "-4",
+                "signature": "onUpdate()",
+                "args": []
+            },
+            "code": "local failure = modula:call(\"onUpdate\"); if failure then error(failure) end"
+        },
+        {
+            "key": "7",
+            "filter": {
+                "slotKey": "-4",
+                "signature": "onFlush()",
+                "args": []
+            },
+            "code": "local failure = modula:call(\"onFlush\"); if failure then error(failure) end"
+        },
+        {
+            "key": "8",
+            "filter": {
+                "slotKey": "-4",
+                "signature": "inputText(text)",
+                "args": [
+                    {
+                        "variable": "text"
+                    }
+                ]
+            },
+            "code": "local failure = modula:call(\"onInput\", text); if failure then error(failure) end"
+        },
+        {
+            "key": "9",
+            "filter": {
+                "slotKey": "-5",
+                "signature": "onStart()",
+                "args": []
+            },
+            "code": "%s"
         }
     ],
     "methods": [],

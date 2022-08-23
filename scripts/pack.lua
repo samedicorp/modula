@@ -91,7 +91,7 @@ local moduleEscaped = jsonEscaped(moduleSource)
 local moduleIndented = indented(moduleSource, "        ")
 
 -- writeTemplate("lua", moduleSource, configSource)
-local jsonPath = writeTemplate("json", configEscaped, config.name, moduleEscaped)
+local jsonPath = writeTemplate("json", configEscaped, moduleEscaped)
 writeTemplate("conf", config.name, configIndented, moduleIndented)
 
 -- copy the generated json to the clipboard
