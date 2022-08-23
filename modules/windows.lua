@@ -14,12 +14,12 @@ function Module:register(modula, parameters)
     self.screenDirty = true
     self.windows = {}
     self.frame = 0
-    self.html = ""
     self.logChanges = parameters.logChanges or false
+    self:setHeader()
 end
 
-function Module:onStart()
-    self.html = [[<style>
+function Module:setHeader()
+    self.header = [[<style>
     :root {
         --primary-color: #7fff00;
         --standout-color: white;
@@ -45,9 +45,10 @@ function Module:onStart()
     .value { fill: var(--standout-color); text-anchor: start; alignment-baseline: central; }
     </style>
     ]]
+end
 
+function Module:onStart()
     system.showScreen(1)
-
     debugf("Window manager running.")
 end
 
@@ -82,39 +83,44 @@ end
 
 function Module:addWindow(window)
     setmetatable(window, { __index = Window })
-    window.screen = self
+    window.data = { screen = self, style = "", content = "", div = "" }
     table.insert(self.windows, window)
     self.screenDirty = true
 end
 
 function Module:buildScreen()
-    local html = { self.html }
+    local html = { self.header }
 
     for i,window in ipairs(self.windows) do
-        local style = {}
-        for k,v in pairs(window) do
-            if (k ~= "content") and (k ~= "name") and (k ~= "html")and (k ~= "style") then
-                table.insert(style, string.format("%s: %s", k, v))
-            end
-        end
-
-        table.insert(html, string.format('<div class="samedi-window" style="%s">%s</div>', table.concat(style, ";"), window.content))
+        local data = window.data
+        table.insert(html, data.div)
     end
 
     self.screen = table.concat(html, "\n")
 end
 
 function Window:update(content)
-    local screen = self.screen
-    local old = self.content
-    self.content = content
-    local contentChanged = content ~= old
+    local data = self.data
+    local screen = data.screen
+
+    local contentChanged = content ~= data.content
     if contentChanged then
-        if screen.logChanges then
-            debugf("%s window %s content changed", self.frame, self.name)
+        -- rebuild css properties
+        local properties = {}
+        for k,v in pairs(self) do
+            if (k ~= "data") then
+                table.insert(properties, string.format("%s: %s", k, v))
+            end
         end
 
-        screen.screenDirty = contentChanged or screen.screenDirty 
+        -- rebuild window <div> tag
+        data.div = string.format('<div class="samedi-window" style="%s">%s</div>', table.concat(properties, ";"), content)
+        data.content = content
+        screen.screenDirty = true
+        if screen.logChanges then
+            debugf("%s window %s content changed", screen.frame, self.name)
+        end
     end
 end
+
 return Module
