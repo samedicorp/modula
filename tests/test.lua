@@ -1,23 +1,29 @@
 package.path = package.path .. ";./du-mocks/src/?.lua"
 
 luaunit = require('luaunit')
-mockCoreUnit = require("dumocks.CoreUnit")
-mockControlUnit = require("dumocks.ControlUnit")
 mockSystem = require("dumocks.System")
 modulaPrototype = require('core')
 
 TestSuite = {}
 
+function makeMock(class, id, name, setup)
+    local module = require("dumocks." .. class)
+    local mock = module:new(nil, id, name)
+    if setup then
+        setup(mock)
+    end
+    return mock:mockGetClosure()
+end
+
 function TestSuite:setUp()
-    local coreMock = mockCoreUnit:new(nil, 1, "dynamic core unit s")
-    coreMock.constructName = "My Construct"
-    _G.Unit_MockCore = coreMock:mockGetClosure()
+    _G.Unit_MockCore = makeMock("CoreUnit", 1, "dynamic core unit s", function(mock)
+        mock.constructName = "My Construct"
+    end)
 
     _G.system = mockSystem:new()
     system.print = print
 
-    local unitMock = mockControlUnit:new(nil, 2, "programming board")
-    _G.unit = unitMock:mockGetClosure()
+    _G.unit = makeMock("ControlUnit", 2, "programming board")
 end
 
 function TestSuite:makeModula(settings)
