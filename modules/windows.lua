@@ -4,10 +4,11 @@
 -- -=screen.lua=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 local Module = {}
+local Window = {}
 
 function Module:register(modula, parameters)
     modula:registerForEvents({"onStart", "onStop", "onFastUpdate"}, self)
-    modula:registerService("screen", self)
+    modula:registerService("windows", self)
 
     self.screen = ""
     self.screenDirty = true
@@ -47,21 +48,24 @@ function Module:onStart()
 
     system.showScreen(1)
 
-    debugf("Screen manager running.")
+    debugf("Window manager running.")
 end
 
 function Module:onStop()
     system.showScreen(0)
-    debugf("Display manager stopped.")
+    debugf("Window manager stopped.")
 end
 
 function Module:onFastUpdate()
-   self.modula:call("onUpdateWindow", self)
+   self.modula:call("onUpdateWindows", self)
 
-   self.frame = self.frame + 1
+   local loggingEnabled = self.logChanges
+   if loggingEnabled then
+       self.frame = self.frame + 1
+   end
 
     if self.screenDirty then
-        if self.logChanges then
+        if loggingEnabled then
             debugf("%s built screen", self.frame)
         end
 
@@ -69,7 +73,7 @@ function Module:onFastUpdate()
         if self.screen ~= self.currentScreen then
             self.currentScreen = self.screen
             system.setScreen(self.screen)
-        elseif self.logChanges then
+        elseif loggingEnabled then
             debug("%s no change after screen rebuild", self.frame)
         end
         self.screenDirty = false
@@ -77,18 +81,10 @@ function Module:onFastUpdate()
 end
 
 function Module:addWindow(window)
+    setmetatable(window, { __index = Window })
+    window.screen = self
     table.insert(self.windows, window)
     self.screenDirty = true
-end
-
-function Module:updateWindow(window, content)
-    local old = window.content
-    window.content = content
-    local contentChanged = content ~= old
-    if contentChanged and self.logChanges then
-        debugf("%s window %s content changed", self.frame, window.name)
-    end
-    self.screenDirty = self.screenDirty or contentChanged
 end
 
 function Module:buildScreen()
@@ -108,4 +104,17 @@ function Module:buildScreen()
     self.screen = table.concat(html, "\n")
 end
 
+function Window:update(content)
+    local screen = self.screen
+    local old = self.content
+    self.content = content
+    local contentChanged = content ~= old
+    if contentChanged then
+        if screen.logChanges then
+            debugf("%s window %s content changed", self.frame, self.name)
+        end
+
+        screen.screenDirty = contentChanged or screen.screenDirty 
+    end
+end
 return Module
