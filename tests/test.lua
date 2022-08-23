@@ -38,12 +38,7 @@ function TestSuite:testCore()
         logCalls = true
     })
 
-    modula:call("onStart")
-end
-
-function error(format, ...)
-    print("ERROR: %s", format:format(...))
-    luaunit.assertTrue(false)
+    luaunit.assert_nil(modula:call("onStart"))
 end
 
 local lu = luaunit.LuaUnit.new()
