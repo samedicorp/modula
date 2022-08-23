@@ -15,7 +15,7 @@ function Module:register(modula, parameters)
 end
 
 function Module:onStart()
-    debug("Panel manager running.")
+    trace("Panel manager running.")
 end
 
 function Module:onStop()
@@ -24,7 +24,7 @@ function Module:onStop()
     end
 
     self.panels = {}
-    debug("Panel manager stopped.")
+    trace("Panel manager stopped.")
 end
 
 function Module:panelNamed(name)
