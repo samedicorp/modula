@@ -83,11 +83,17 @@ function ModulaCore:call(handler, ...)
         local func = o[handler]
         local status, failure = pcall(func, o, ...)
         if not status then
-            -- TODO: extract a better error path?
-            -- failure = failure:gsub("\\-\\- -=", "xx")
+            local pattern = '"[string'
+            local message = string.gsub(failure, '.*:.*:(.*)', "%1")
+            local line = string.gsub(failure, '.*:(.*):.*', "%1")
+            -- printf("ERROR in %s.%s, %s", o.name, handler, line)
+            -- printf(message)
+            -- printf(traceback())
+            -- failure = failure:gsub('%[string "%-%- %-%=(%w+).*%]', "%1")
+            -- failure = failure:gsub('%[string "%-%- %-%=', "")
             -- failure = failure:gsub('"%-%- |STDERROR%-EVENTHANDLER[^"]*"','chunk'):
-            -- printf(failure)
-            fail(failure)
+            failure = string.format("%s:%s: %s", o.name, line, message)
+            fail(string.format("%s:%s: %s\n\n%s", o.name, line, message, traceback()))
             return failure
         end
     end
