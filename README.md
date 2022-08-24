@@ -81,7 +81,7 @@ Any other modules that have registered will be called.
 
 This ability is useful for modules that need to synchronise their actions with other modules. 
 
-For example, the screen module manages creating html screen content. It calls `onUpdateScreen` to ask other modules to update their content. Any module interested in displaying screen content registers for this event. When a module gets the event, it calls the screen module back to provide some content. The screen module then combines it all into the final screen html.
+For example, the windows module manages creating html screen content. It calls `onUpdateWindows` to ask other modules to update their window content. Any module interested in displaying a window registers for this event. When a module gets the event, it calls the windows module back to provide some content. The screen module then combines the content of all windows into the final screen html.
 
 ## Services
 
@@ -153,7 +153,7 @@ actions = {
 
 ### Ported Modules
 - panels: manages panels and widgets
-- windows: allows you to display "windows" to the screen
+- windows: allows you to display "windows" on the screen
 
 ### UI Modules Which Will Likely Be Ported
 - airspeed
