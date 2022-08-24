@@ -32,7 +32,8 @@ function ModulaCore.new(system, library, player, construct, unit, settings)
         handlers = {},
         loopRepeat = 0.6,
         longPressTime = 0.5,
-        running = false
+        running = false,
+        rawPrint = system.print
     }
 
     setmetatable(instance, {__index = ModulaCore})
@@ -257,11 +258,46 @@ function ModulaCore:loadElements()
 
     local core = self.core
     self:withElements("ScreenUnit", function(element)
-        local id = element.getId()
-        if core.getElementNameById(id) == "Console" then
-            debugf("Installed console.")
+        local id = element.getLocalId()
+        if core.getElementNameById(id) == "console" then
             self.console = element
+            self.consoleBuffer = {}
+            local sysPrint = self.rawPrint
+            self.rawPrint = function(text)
+                sysPrint(text)
+                table.insert(self.consoleBuffer, text)
+                self.console.setScriptInput(table.concat(self.consoleBuffer, "\n"))
+            end
+            element.setRenderScript([[
+                local layer = createLayer() -- create a new layer 
+                local rx, ry = getResolution() -- get the resolution of the screen 
+                local font = loadFont("Play", 20) -- load the "Play" font at size 20 
+                local text = getInput():gmatch("[^\n]+")
+                local x = 0
+                local y = 0
+                local scroll = 0
+                local i = 0
+                
+                for w in text do
+                    if i >= scroll then
+                        addText(layer, font, w, x, y)
+                        y = y + 20
+                        if y > ry then
+                            break
+                        end
+                    end
+                    i = i + 1
+                end 
+                
+                if getCursorDown() then
+                    scroll = scroll + 1
+                end
+
+                requestAnimationFrame(2)
+            ]])
         end
+            
+        debugf("Installed console.")
     end)
 end
 
@@ -471,11 +507,12 @@ function ModulaCore:setupGlobals(system, library, player, construct, unit)
     _G.printf = function(format, ...)
         local t = type(format)
 
+        local rawPrint = self.rawPrint
         if type(format) == "string" then
-            system.print(format:format(...))
+            rawPrint(format:format(...))
         else
-            system.print(toString(format))
-            for i, a in ipairs({...}) do system.print(toString(a)) end
+            rawPrint(toString(format))
+            for i, a in ipairs({...}) do rawPrint(toString(a)) end
         end
     end
 
