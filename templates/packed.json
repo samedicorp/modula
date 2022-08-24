@@ -43,7 +43,7 @@
             }
         },
         "1": {
-            "name": "slot2",
+            "name": "screen",
             "type": {
                 "methods": [],
                 "events": []
@@ -216,6 +216,15 @@
                 "args": []
             },
             "code": "%s"
+        },
+        {
+            "key": "10",
+            "filter": {
+                "slotKey": "1",
+                "signature": "onOutputChanged(output)",
+                "args": []
+            },
+            "code": "local failure = modula:call(\"onOutputChanged\", output); if failure then error(failure) end"
         }
     ],
     "methods": [],
