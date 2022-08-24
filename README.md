@@ -66,7 +66,7 @@ With the exception of `unit.onStart`, all of the event handlers that are actuall
 Modules can register for events with the Modula core:
 
 ```lua
-    modula:registerForEvents({"onStart", "onStop"}, self)
+    modula:registerForEvents(self, "onStart", "onStop")
 ```
 
 When the event occurs, the corresponding handler on the module will be called. 

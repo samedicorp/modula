@@ -7,7 +7,7 @@ local Module = {}
 local Window = {}
 
 function Module:register(modula, parameters)
-    modula:registerForEvents({"onStart", "onStop", "onFastUpdate"}, self)
+    modula:registerForEvents(self, "onStart", "onStop", "onFastUpdate")
     modula:registerService("windows", self)
 
     self.screen = ""
