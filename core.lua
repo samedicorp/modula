@@ -269,31 +269,9 @@ function ModulaCore:loadElements()
                 self.console.setScriptInput(table.concat(self.consoleBuffer, "\n"))
             end
             element.setRenderScript([[
-                local layer = createLayer() -- create a new layer 
-                local rx, ry = getResolution() -- get the resolution of the screen 
-                local font = loadFont("Play", 20) -- load the "Play" font at size 20 
-                local text = getInput():gmatch("[^\n]+")
-                local x = 0
-                local y = 0
-                local scroll = 0
-                local i = 0
-                
-                for w in text do
-                    if i >= scroll then
-                        addText(layer, font, w, x, y)
-                        y = y + 20
-                        if y > ry then
-                            break
-                        end
-                    end
-                    i = i + 1
-                end 
-                
-                if getCursorDown() then
-                    scroll = scroll + 1
-                end
-
-                requestAnimationFrame(2)
+                local render = require('samedicorp.modula.render')
+                local rx, ry = getResolution()
+                render:textField(getInput(), 2, 2, rx - 4, ry - 4, "Play", 20)
             ]])
         end
             
