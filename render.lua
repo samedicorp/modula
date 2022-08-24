@@ -9,14 +9,27 @@ local getCursor = _ENV.getCursor
 local getCursorDown = _ENV.getCursorDown
 local requestAnimationFrame = _ENV.requestAnimationFrame
 local addBox = _ENV.addBox
+local addTriangle = _ENV.addTriangle
 local setNextFillColor = _ENV.setNextFillColor
 local setNextStrokeColor = _ENV.setNextStrokeColor
 local setNextStrokeWidth = _ENV.setNextStrokeWidth
 
 local Point = {}
 local Rect = {}
+local Triangle = {}
 local Color = {}
 local Size = {}
+
+function Point.new(x, y)
+    local p = { x = x, y = y}
+    setmetatable(p, { __index = Point })
+    return p
+end
+
+function Point:mid(p2)
+    return Point.new((self.x + p2.x) / 2, (self.y + p2.y) / 2)
+end
+
 
 function Rect.new(x, y, w, h)
     local r = { x = x, y = y, width = w, height = h }
@@ -24,28 +37,48 @@ function Rect.new(x, y, w, h)
     return r
 end
 
-function Rect:drawBox(layer, stroke, fill)
+function Rect:inset(l,t,r,b)
+    t = t or l
+    r = r or l
+    b = b or t
+    return self.new(self.x + l, self.y + t, self.width - (l + r), self.height - (t + b))
+end
+
+function Rect:topLeft()
+    return Point.new(self.x, self.y)
+end
+
+function Rect:topRight()
+    return Point.new(self.x + self.width - 1, self.y)
+end
+
+function Rect:bottomLeft()
+    return Point.new(self.x, self.y + self.height - 1)
+end
+
+function Rect:bottomRight()
+    return Point.new(self.x + self.width - 1, self.y + self.height - 1)
+end
+
+function Rect:draw(layer, stroke, fill, width)
     setNextStrokeColor(layer, stroke.red, stroke.green, stroke.blue, stroke.alpha)
     setNextFillColor(layer, fill.red, fill.green, fill.blue, fill.alpha)
-    setNextStrokeWidth(layer, 1)
+    setNextStrokeWidth(layer, width or 1)
     addBox(layer, self.x, self.y, self.width, self.height)
 end
 
+function Triangle.new(p1, p2, p3)
+    local t = { p1 = p1, p2 = p2, p3 = p3 }
+    setmetatable(t, { __index = Triangle })
+    return t
+end
 
--- local Box = {}
--- function Box.new(rect)
---     local b = { rect = rect }
---     setmetatable(b, { __index = Box })
---     return b
--- end
--- function Box:render(layer, stroke, fill)
---     local r = self.rect
-
---     setNextStrokeColor(layer, stroke.red, stroke.green, stroke.blue, stroke.alpha)
---     setNextFillColor(layer, fill.red, fill.green, fill.blue, fill.alpha)
---     setNextStrokeWidth(layer, 1)
---     addBox(layer, r.x, r.y, r.width, r.height)
--- end
+function Triangle:draw(layer, stroke, fill, width)
+    setNextStrokeColor(layer, stroke.red, stroke.green, stroke.blue, stroke.alpha)
+    setNextFillColor(layer, fill.red, fill.green, fill.blue, fill.alpha)
+    setNextStrokeWidth(layer, width or 1)
+    addTriangle(layer, self.p1.x, self.p1.y, self.p2.x, self.p2.y, self.p3.x, self.p3.y)
+end
 
 function Color.new(r, g, b, a)
     local c = { red = r, green = g, blue = b, alpha = a or 1}
@@ -63,12 +96,9 @@ function Module:textField(text, x, y, width, height, fontName, fontSize)
     local i = 0
 
     local scrollBarWidth = 24
-    local scrollButtonSize = scrollBarWidth - 2
-    local scrollButtonX = x + width - scrollBarWidth + 1
 
     local bar = Rect.new(x + width - scrollBarWidth + 1, y, scrollBarWidth, height - 1)
-    local up = Rect.new(scrollButtonX, y + 1, scrollButtonSize, scrollButtonSize)
-    local down = Rect.new(scrollButtonX, y + height - 1 - scrollButtonSize, scrollBarWidth, scrollButtonSize)
+    local barIn = bar:inset(4)
 
     local upFill = black
     local downFill = black
@@ -96,9 +126,14 @@ function Module:textField(text, x, y, width, height, fontName, fontSize)
         i = i + 1
     end 
 
-    bar:drawBox(layer, white, black)
-    up:drawBox(layer, white, upFill)
-    down:drawBox(layer, white, downFill)
+    bar:draw(layer, white, black)
+    local barInH = barIn.height
+    barIn.height = barIn.width
+    local upT = Triangle.new(barIn:bottomLeft(), barIn:bottomRight(), barIn:topLeft():mid(barIn:topRight()))
+    upT:draw(layer, white, upFill)
+    barIn.y = barIn.y + barInH - barIn.width
+    local downT = Triangle.new(barIn:topLeft(), barIn:topRight(), barIn:bottomLeft():mid(barIn:bottomRight()))
+    downT:draw(layer, white, downFill)
 
 end
 
