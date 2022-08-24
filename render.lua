@@ -13,7 +13,6 @@ local setNextFillColor = _ENV.setNextFillColor
 local setNextStrokeColor = _ENV.setNextStrokeColor
 local setNextStrokeWidth = _ENV.setNextStrokeWidth
 
-local Box = {}
 local Point = {}
 local Rect = {}
 local Color = {}
@@ -25,40 +24,64 @@ function Rect.new(x, y, w, h)
     return r
 end
 
-function Box.new(rect)
-    local b = { rect = rect }
-    setmetatable(b, { __index = Box })
+function Rect:drawBox(layer, stroke, fill)
+    setNextStrokeColor(layer, stroke.red, stroke.green, stroke.blue, stroke.alpha)
+    setNextFillColor(layer, fill.red, fill.green, fill.blue, fill.alpha)
+    setNextStrokeWidth(layer, 1)
+    addBox(layer, self.x, self.y, self.width, self.height)
 end
 
-function Box:render(layer)
-    local r = self.rect
-    addBox(layer, r.x, r.y, r.width, r.height)
+
+-- local Box = {}
+-- function Box.new(rect)
+--     local b = { rect = rect }
+--     setmetatable(b, { __index = Box })
+--     return b
+-- end
+-- function Box:render(layer, stroke, fill)
+--     local r = self.rect
+
+--     setNextStrokeColor(layer, stroke.red, stroke.green, stroke.blue, stroke.alpha)
+--     setNextFillColor(layer, fill.red, fill.green, fill.blue, fill.alpha)
+--     setNextStrokeWidth(layer, 1)
+--     addBox(layer, r.x, r.y, r.width, r.height)
+-- end
+
+function Color.new(r, g, b, a)
+    local c = { red = r, green = g, blue = b, alpha = a or 1}
+    setmetatable(c, { __index = Color })
+    return c
 end
 
-function Module:drawLines(text, x, y, width, height, fontName, fontSize)
+local white = Color.new(1, 1, 1)
+local black = Color.new(0, 0, 0)
+
+function Module:textField(text, x, y, width, height, fontName, fontSize)
     local layer = createLayer()
     local font = loadFont(fontName, fontSize)
     local lines = text:gmatch("[^\n]+")
     local i = 0
 
-    local scrollBarWidth = 32
+    local scrollBarWidth = 24
     local scrollButtonSize = scrollBarWidth - 2
     local scrollButtonX = x + width - scrollBarWidth + 1
 
-    setNextFillColor(layer, 0, 0, 0, 1)
-    setNextStrokeColor(layer, 1, 1, 1, 1)
-    setNextStrokeWidth(layer, 1)
-    addBox(layer, x + width - scrollBarWidth, y, scrollBarWidth, height)
-    addBox(layer, scrollButtonX, y + 1, scrollButtonSize, scrollButtonSize)
-    addBox(layer, scrollButtonX, y + height - 1, scrollBarWidth, scrollButtonSize)
+    local bar = Rect.new(x + width - scrollBarWidth + 1, y, scrollBarWidth, height - 1)
+    local up = Rect.new(scrollButtonX, y + 1, scrollButtonSize, scrollButtonSize)
+    local down = Rect.new(scrollButtonX, y + height - 1 - scrollButtonSize, scrollBarWidth, scrollButtonSize)
+
+    local upFill = black
+    local downFill = black
 
     local s = self.scroll or 0
     local cx, cy = getCursor()
     if getCursorDown() and (cx > (width - scrollBarWidth)) then
         if cy > (height / 2) then
             self.scroll = s + 1
+            downFill = white
         elseif s > 0 then
             self.scroll = s - 1
+            upFill = white
         end
     end
 
@@ -72,6 +95,11 @@ function Module:drawLines(text, x, y, width, height, fontName, fontSize)
         end
         i = i + 1
     end 
+
+    bar:drawBox(layer, white, black)
+    up:drawBox(layer, white, upFill)
+    down:drawBox(layer, white, downFill)
+
 end
 
 return Module
