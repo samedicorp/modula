@@ -40,9 +40,9 @@ function ModulaCore.new(system, library, player, construct, unit, settings)
 
     instance:setupGlobals(system, library, player, construct, unit)
     instance:setupHandlers()
+    instance:loadElements()
     instance:registerModules()
     instance:registerActions(settings.actions or {})
-    instance:loadElements()
 
     debugf("Initialised Modula Core")
     instance.running = true
@@ -98,7 +98,8 @@ function ModulaCore:call(handler, ...)
     end
 end
 
-function ModulaCore:registerForEvents(handlers, object)
+function ModulaCore:registerForEvents(object, ...)
+    local handlers = { ... }
     for i,handler in ipairs(handlers) do
         if not object[handler] then
             warning("Module %s does not have a handler for %s", object.name, handler)
@@ -255,28 +256,6 @@ function ModulaCore:loadElements()
 
     self.elements = elements
     self.settings = self:findElement("DataBankUnit")
-
-    local core = self.core
-    self:withElements("ScreenUnit", function(element)
-        local id = element.getLocalId()
-        if core.getElementNameById(id) == "console" then
-            self.console = element
-            self.consoleBuffer = {}
-            local sysPrint = self.rawPrint
-            self.rawPrint = function(text)
-                sysPrint(text)
-                table.insert(self.consoleBuffer, text)
-                self.console.setScriptInput(table.concat(self.consoleBuffer, "\n"))
-            end
-            element.setRenderScript([[
-                local render = require('samedicorp.modula.render')
-                local rx, ry = getResolution()
-                render:textField(getInput(), 2, 2, rx - 4, ry - 4, "Play", 20)
-            ]])
-        end
-            
-        debugf("Installed console.")
-    end)
 end
 
 function ModulaCore:allElements()

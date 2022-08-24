@@ -95,9 +95,13 @@ function Module:safeRect()
 end
 
 function Module:textField(text, rect, fontName, fontSize)
+    local lines = text:gmatch("[^\n]+")
+    self:textLineField(lines, rect, fontName, fontSize)
+end
+
+function Module:textLineField(lines, rect, fontName, fontSize)
     local layer = createLayer()
     local font = loadFont(fontName, fontSize)
-    local lines = text:gmatch("[^\n]+")
     local i = 0
     local x = rect.x
     local y = rect.y
@@ -124,7 +128,7 @@ function Module:textField(text, rect, fontName, fontSize)
         end
     end
 
-    for w in lines do
+    for i,w in ipairs(lines) do
         if i >= s then
             y = y + fontSize
             addText(layer, font, w, x, y)
