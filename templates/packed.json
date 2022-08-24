@@ -222,7 +222,11 @@
             "filter": {
                 "slotKey": "1",
                 "signature": "onOutputChanged(output)",
-                "args": []
+                "args": [
+                    {
+                        "variable": "output"
+                    }
+                ]
             },
             "code": "local failure = modula:call(\"onOutputChanged\", output); if failure then error(failure) end"
         }

@@ -13,6 +13,8 @@ local addTriangle = _ENV.addTriangle
 local setNextFillColor = _ENV.setNextFillColor
 local setNextStrokeColor = _ENV.setNextStrokeColor
 local setNextStrokeWidth = _ENV.setNextStrokeWidth
+local getRenderCost = _ENV.getRenderCost
+local getRenderCostMax = _ENV.getRenderCostMax
 
 local Point = {}
 local Rect = {}
@@ -138,6 +140,9 @@ function Module:textLineField(lines, rect, fontName, fontSize)
         end
         i = i + 1
     end 
+
+    -- local text = string.format('render cost: %.02f', getRenderCost() / getRenderCostMax()) 
+    -- addText(layer, font, text, 10, 20)
 
     bar:draw(layer, white, black)
     local barInH = barIn.height
