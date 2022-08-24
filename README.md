@@ -29,7 +29,7 @@ The pack script is itself written in Lua, so you will need lua, and lua-rocks in
 
 Installing git is not strictly necessary but probably a good idea.
 
-For development I use VS Code. A build script is included which runs the pack script when you hit Ctrl-Shift-B. This automatically packs the complete script into a `.conf` file in `autoconf/custom`. It also writes a `.json` file to the same place.
+For development I use VS Code. A build script is included which runs the pack script when you hit Ctrl-Shift-B. This automatically packs the complete script into a `.conf` file in `autoconf/custom`. It also writes a `.json` file to the same place, and copies it into the clipboard.
 
 ## Modules
 
