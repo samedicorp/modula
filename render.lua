@@ -89,11 +89,20 @@ end
 local white = Color.new(1, 1, 1)
 local black = Color.new(0, 0, 0)
 
-function Module:textField(text, x, y, width, height, fontName, fontSize)
+function Module:safeRect()
+    local width, height = getResolution()
+    return Rect.new(0, 0, width, height):inset(8)
+end
+
+function Module:textField(text, rect, fontName, fontSize)
     local layer = createLayer()
     local font = loadFont(fontName, fontSize)
     local lines = text:gmatch("[^\n]+")
     local i = 0
+    local x = rect.x
+    local y = rect.y
+    local width = rect.width
+    local height = rect.height
 
     local scrollBarWidth = 24
 
@@ -117,8 +126,8 @@ function Module:textField(text, x, y, width, height, fontName, fontSize)
 
     for w in lines do
         if i >= s then
-            addText(layer, font, w, x, y)
             y = y + fontSize
+            addText(layer, font, w, x, y)
             if y > height then
                 break
             end
@@ -136,5 +145,9 @@ function Module:textField(text, x, y, width, height, fontName, fontSize)
     downT:draw(layer, white, downFill)
 
 end
+
+Module.Point = Point
+Module.Rect = Rect
+Module.Color = Color
 
 return Module
