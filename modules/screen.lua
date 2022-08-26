@@ -66,8 +66,7 @@ function Module:onScreenReply(output)
 end
 
 Module.renderScript = [[
-    frame = frame or 0
-    local render = require('samedicorp.modula.render')
+    frame = (frame or 0) + 1
     local name = '%s'
     local reply
     local input = getInput()
