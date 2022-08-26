@@ -8,7 +8,7 @@ local Window = {}
 
 function Module:register(modula, parameters)
     modula:registerForEvents(self, "onStart", "onStop", "onFastUpdate")
-    modula:registerService("windows", self)
+    modula:registerService(self, "windows")
 
     self.screen = ""
     self.screenDirty = true

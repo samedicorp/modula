@@ -3,6 +3,17 @@
 --  All code (c) 2020 - present day, The Samedi Corporation.
 -- -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
+-- If a screen with the right name is linked, we use it as a console and
+-- echo all printf/debugf output to it.
+--
+-- For this to work, you need to add an onOutputChanged handler to the screen
+-- containing the following:
+--
+--   local failure = modula:call("onConsoleOutput", output)
+--   if failure then 
+--     error(failure) 
+--   end
+
 local Module = {}
 
 function Module:register(modula, parameters)
@@ -56,7 +67,6 @@ function Module:flushBuffer()
             local line = self.buffer[1]
             table.remove(self.buffer, 1)
             self.console.setScriptInput(line)
-            system.print("sent " .. line)
         end
     end
 end
@@ -68,7 +78,6 @@ function Module:onSlowUpdate()
 end
 
 function Module:onConsoleOutput(output)
-    system.print("out " .. output)
     if #self.buffer == 0 then
         self.console.setScriptInput(nil)
     end

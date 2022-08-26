@@ -177,7 +177,7 @@ end
 -- Services
 -- ---------------------------------------------------------------------
 
-function ModulaCore:registerService(name, module)
+function ModulaCore:registerService(module, name)
     debugf("Registered %s as service %s", module.name, name)
     self.services[name] = module
 end

@@ -9,7 +9,7 @@ local Panel = {}
 
 function Module:register(modula, parameters)
     modula:registerForEvents(self, "onStart", "onStop")
-    modula:registerService("panels", self)
+    modula:registerService(self, "panels")
 
     self.panels = {}
 end

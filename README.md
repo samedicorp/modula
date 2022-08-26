@@ -90,7 +90,7 @@ Some modules provide services to other modules, but don't do so using events.
 These modules can register themselves with the core:
 
 ```lua
-    modula:registerService("panels", self)
+    modula:registerService(self, "panels")
 ```
 
 Any other module that needs the "panels" service can find it, without having to know exactly what module is providing it:
