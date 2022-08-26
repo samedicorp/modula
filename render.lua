@@ -1,6 +1,5 @@
 local Module = {}
 
-local getResolution = _ENV.getResolution
 local getInput = _ENV.getInput
 local requestAnimationFrame = _ENV.requestAnimationFrame
 local addBox = _ENV.addBox
@@ -27,6 +26,17 @@ function Module:safeRect()
     return self:screenRect():inset(8)
 end
 
+function Module:interactive(cursor)
+    local rate
+    if self:screenRect():contains(cursor) then
+        rate = 2
+    else
+        rate = 30
+    end
+
+    requestAnimationFrame(rate)
+    return rate
+end
 
 Module.Point = Point.new
 Module.Rect = Rect.new

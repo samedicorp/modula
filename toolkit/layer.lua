@@ -4,20 +4,21 @@ local Font = require('samedicorp.modula.toolkit.font')
 local Label = require('samedicorp.modula.toolkit.label')
 local Point = require('samedicorp.modula.toolkit.point')
 local Rect = require('samedicorp.modula.toolkit.rect')
+local Screen = require('samedicorp.modula.toolkit.screen')
 local Triangle = require('samedicorp.modula.toolkit.triangle')
 
 local Layer = {}
 
 local createLayer = _ENV.createLayer
 local addText = _ENV.addText
-local getCursor = _ENV.getCursor
-local getCursorDown = _ENV.getCursorDown
+local requestAnimationFrame = _ENV.requestAnimationFrame
 
 function Layer.new()
     local l = { 
         layer = createLayer(),
         widgets = {},
-        defaultFont = Font.new("Play", 20)
+        defaultFont = Font.new("Play", 20),
+        screen = Screen.default
     }
 
     setmetatable(l, { __index = Layer })
@@ -28,27 +29,23 @@ function Layer:draw(object)
     object:drawInLayer(self)
 end
 
-function Layer:getCursor()
-    local x,y = getCursor()
-    return Point.new(x, y)
-end
-
 function Layer:render()
-    local cursor = self:getCursor()
-    local isDown = getCursorDown()
-    self.over = nil
+    local cursor = self.screen:cursor()
+    local isDown = self.screen:isCursorDown()
+    local over
 
     for i,widget in ipairs(self.widgets) do
         local isOver = widget:hitTest(cursor) 
         if isOver then
-            self.over = widget
+            over = widget
         end
 
         widget:drawInLayer(self, isOver, isDown)
     end
 
-    if isDown then
-        local action = self.over.action
+    self.over = over
+    if isDown and over then
+        local action = over.action
         if action then
             action()
         end
@@ -71,6 +68,18 @@ function Layer:addLabel(...)
     return label
 end
 
+
+function Layer:scheduleRefresh()
+    local rate
+    if self.screen:isFocussed() then
+        rate = 2
+    else
+        rate = 30
+    end
+
+    requestAnimationFrame(rate)
+    return rate
+end
 
 function Layer:textField(text, rect, font)
     local lines = text:gmatch("[^\n]+")
@@ -95,8 +104,8 @@ function Layer:textLineField(lines, rect, font)
     local downFill = Color.black
 
     local s = self.scroll or 0
-    local cx, cy = getCursor()
-    if getCursorDown() and (cx > (width - scrollBarWidth)) then
+    local cx, cy = Screen.default:cursor()
+    if Screen.default:isCursorDown() and (cx > (width - scrollBarWidth)) then
         if cy > (height / 2) then
             self.scroll = s + 1
             downFill = Color.white

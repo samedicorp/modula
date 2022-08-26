@@ -22,18 +22,25 @@ end
 function Button:drawInLayer(layer, isOver, isDown)
     local stroke
     local fill
-    if isDown then
-        stroke = Color.black
+    local text
+    if isDown and isOver then
+        stroke = Color.red
+        text = Color.black
         fill = Color.white
+    elseif isOver then
+        stroke = Color.red
+        text = Color.white
+        fill = Color.black
     else
         stroke = Color.white
+        text = Color.white
         fill = Color.black
     end
 
     self.rect:draw(layer.layer, stroke, fill)
     local lr = self.rect:inset(2)
     local anchor = lr:bottomLeft():mid(lr:bottomRight())
-    self.text:drawInLayer(layer, anchor.x, anchor.y, { fill = stroke, align = self.align })
+    self.text:drawInLayer(layer, anchor.x, anchor.y, { fill = text, align = self.align })
 end
 
 function Button:hitTest(point)
