@@ -9,7 +9,7 @@ function Text.new(text, font, color, options)
     return t
 end
 
-function Text:drawInLayer(layer, x, y, explicitOptions)
+function Text:drawInLayer(layer, position, explicitOptions)
     local options = explicitOptions or {}
     local font = (self.font or layer.defaultFont).font
     local fill = options.fill or self.options.fill
@@ -20,7 +20,7 @@ function Text:drawInLayer(layer, x, y, explicitOptions)
     if align then
         setNextTextAlign(layer.layer, align.h, align.v)
     end
-    addText(layer.layer, font, self.text, x, y)
+    addText(layer.layer, font, self.text, position.x, position.y)
 end
 
 return Text

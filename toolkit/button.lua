@@ -15,11 +15,14 @@ function Button.new(text, rect, action)
         align = { h = _ENV.AlignH_Center, v = _ENV.AlignV_Baseline }
     }
 
+
     setmetatable(b, { __index = Button })
+    b.drawInLayer = b.drawStyle2
+
     return b
 end
 
-function Button:drawInLayer(layer, isOver, isDown)
+function Button:drawStyle1(layer, isOver, isDown)
     local stroke
     local fill
     local text
@@ -37,10 +40,34 @@ function Button:drawInLayer(layer, isOver, isDown)
         fill = Color.black
     end
 
+    self.rect:draw(layer.layer, stroke, fill, { radius = 8.0 })
+    local lr = self.rect:inset(2)
+    local anchor = lr:bottomMid()
+    self.text:drawInLayer(layer, anchor, { fill = text, align = self.align })
+end
+
+function Button:drawStyle2(layer, isOver, isDown)
+    local stroke
+    local fill
+    local text
+    if isDown and isOver then
+        stroke = Color.white
+        text = Color.black
+        fill = Color.white
+    elseif isOver then
+        stroke = Color.white
+        text = Color.white
+        fill = Color.new(1, 1, 1, 0.2)
+    else
+        stroke = Color.white
+        text = Color.white
+        fill = Color.black
+    end
+
     self.rect:draw(layer.layer, stroke, fill)
     local lr = self.rect:inset(2)
-    local anchor = lr:bottomLeft():mid(lr:bottomRight())
-    self.text:drawInLayer(layer, anchor.x, anchor.y, { fill = text, align = self.align })
+    local anchor = lr:bottomMid()
+    self.text:drawInLayer(layer, anchor, { fill = text, align = self.align })
 end
 
 function Button:hitTest(point)

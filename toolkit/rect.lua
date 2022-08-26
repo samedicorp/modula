@@ -34,15 +34,24 @@ function Rect:bottomRight()
     return Point.new(self.x + self.width - 1, self.y + self.height - 1)
 end
 
+function Rect:bottomMid()
+    return self:bottomLeft():mid(self:bottomRight())
+end
+
 function Rect:contains(point)
     return (point.x >= self.x) and (point.y >= self.y) and (point.x < (self.x + self.width)) and (point.y < (self.y + self.height))
 end
 
-function Rect:draw(layer, stroke, fill, width)
+function Rect:draw(layer, stroke, fill, options)
+    options = options or {}
     stroke:setNextStroke(layer)
     fill:setNextFill(layer)
-    setNextStrokeWidth(layer, width or 1)
-    addBox(layer, self.x, self.y, self.width, self.height)
+    setNextStrokeWidth(layer, options.width or 1)
+    if options.radius then
+        addBoxRounded(layer, self.x, self.y, self.width, self.height, options.radius)
+    else
+        addBox(layer, self.x, self.y, self.width, self.height)
+    end
 end
 
 return Rect
