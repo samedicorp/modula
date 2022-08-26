@@ -25,6 +25,7 @@ local Button = {}
 local Font = {}
 local Layer = {}
 local Text = {}
+local Label = {}
 
 function Point.new(x, y)
     local p = { x = x, y = y}
@@ -160,6 +161,10 @@ function Module:textLineField(lines, rect, fontName, fontSize)
 end
 
 function Button.new(label, rect)
+    if type(label) == "string" then
+        label = Text.new(label)
+    end
+
     local b = { 
         label = label, 
         rect = rect, 
@@ -172,14 +177,24 @@ end
 function Button:drawInLayer(layer)
     self.rect:draw(layer.layer, white, black)
     local lr = self.rect:inset(2)
-    local font = (self.font or layer.defaultFont).font
-    addText(layer.layer, font, self.label, lr.x, lr.y + lr.height)
+    self.label:drawInLayer(layer, lr.x, lr.y + lr.height)
 end
 
 function Font.new(name, size)
     local f = { name = name, size = size, font = loadFont(name, size)}
     setmetatable(f, { __index = Font })
     return f
+end
+
+function Text.new(text, font)
+    local t = { text = text, font = font }
+    setmetatable(t, { __index = Text })
+    return t
+end
+
+function Text:drawInLayer(layer, x, y)
+    local font = (self.font or layer.defaultFont).font
+    addText(layer.layer, font, self.text, x, y)
 end
 
 function Layer.new()
@@ -207,12 +222,31 @@ function Layer:addWidget(widget)
     table.insert(self.widgets, widget)
 end
 
-function Layer:newButton(...)
+function Layer:addButton(...)
     local button = Button.new(...)
     self:addWidget(button)
     return button
 end
 
+function Layer:addLabel(...)
+    local label = Label.new(...)
+    self:addWidget(label)
+    return label
+end
+
+function Label.new(text, x, y)
+    if type(text) == "string" then
+        text = Text.new(text)
+    end
+
+    local l = { text = text, x = x, y = y }
+    setmetatable(l, { __index = Label })
+    return l
+end
+
+function Label:drawInLayer(layer)
+    self.text:drawInLayer(layer, self.x, self.y)
+end
 
 Module.Point = Point.new
 Module.Rect = Rect.new
@@ -221,5 +255,6 @@ Module.Button = Button.new
 Module.Font = Font.new
 Module.Text = Text.new
 Module.Layer = Layer.new
+Module.Label = Label.new
 
 return Module
