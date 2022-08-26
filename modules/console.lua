@@ -6,7 +6,7 @@
 local Module = {}
 
 function Module:register(modula, parameters)
-    modula:registerForEvents(self, "onOutputChanged", "onSlowUpdate")
+    modula:registerForEvents(self, "onConsoleOutput", "onSlowUpdate")
 
     local name = parameters.name
     if name then
@@ -20,52 +20,60 @@ function Module:connectTo(modula, name)
         local id = element.getLocalId()
         if core.getElementNameById(id) == name then
             self.console = element
-            self.consoleBuffer = {}
+            self.buffer = {}
             self.sysPrint = modula.rawPrint
             modula.rawPrint = function(text)
                 self.sysPrint(text)
-                table.insert(self.consoleBuffer, text)
+                table.insert(self.buffer, text)
             end
             element.setRenderScript([[
                 local render = require('samedicorp.modula.render')
-                local input = getInput()
                 frame = frame or 0
                 buffer = buffer or {}
+                local input = getInput()
                 if input then
                     table.insert(buffer, input)
                 end
                 render:textLineField(buffer, render:safeRect(), "Play", 20)
-                setOutput(frame)
+
                 frame = frame + 1
+                if input then
+                    setOutput(frame)
+                end
             ]])
+
+            debugf("Installed console.")
         end
             
-        debugf("Installed console.")
     end)
 end
 
-function Module:sendLine()
-    local count = #self.consoleBuffer
+function Module:flushBuffer()
+    local count = #self.buffer
     if count > 0 then
         if not self.sending then
             self.sending = true
-            local line = self.consoleBuffer[1]
-            table.remove(self.consoleBuffer, 1)
+            local line = self.buffer[1]
+            table.remove(self.buffer, 1)
             self.console.setScriptInput(line)
+            system.print("sent " .. line)
         end
     end
 end
 
 function Module:onSlowUpdate()
-    self:sendLine()
+    if not self.sending then
+        self:flushBuffer()
+    end
 end
 
-function Module:onOutputChanged(output)
-    if #self.consoleBuffer == 0 then
+function Module:onConsoleOutput(output)
+    system.print("out " .. output)
+    if #self.buffer == 0 then
         self.console.setScriptInput(nil)
     end
     self.sending = false
-    self:sendLine()
+    self:flushBuffer()
 end
 
 return Module
