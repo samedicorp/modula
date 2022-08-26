@@ -45,7 +45,9 @@ function Module:connectTo(modula, name)
                 if input then
                     table.insert(buffer, input)
                 end
-                render:textLineField(buffer, render:safeRect(), "Play", 20)
+
+                local layer = render.Layer()
+                layer:textLineField(buffer, render:safeRect())
 
                 frame = frame + 1
                 if input then
