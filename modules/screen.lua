@@ -3,29 +3,7 @@
 --  All code (c) 2022, The Samedi Corporation.
 -- -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-local renderScript = [[
-frame = frame or 0
-local render = require('samedicorp.modula.render')
-local name = '%s'
-local reply
-local input = getInput()
-local command
-local payload
 
-if input then
-    local i = input:find(":")
-    if i then
-        command = input:sub(1, i - 1)
-        payload = input:sub(i + 1)
-    end
-end
-
-%s
-
-if reply then
-    setOutput(string.format("%%s:%%s", name, reply))
-end
-]]
 
 local Module = { }
 local Screen = { }
@@ -59,7 +37,7 @@ function Module:registerScreen(handler, name, code)
             
 
             element.setScriptInput(nil)
-            element.setRenderScript(renderScript:format(name, code))
+            element.setRenderScript(self.renderScript:format(name, code))
             debugf("Registered screen %s.", name)
             registered = screen
             return screen
@@ -87,6 +65,29 @@ function Module:onScreenReply(output)
     end
 end
 
+Module.renderScript = [[
+    frame = frame or 0
+    local render = require('samedicorp.modula.render')
+    local name = '%s'
+    local reply
+    local input = getInput()
+    local command
+    local payload
+    
+    if input then
+        local i = input:find(":")
+        if i then
+            command = input:sub(1, i - 1)
+            payload = input:sub(i + 1)
+        end
+    end
+    
+    %s
+    
+    if reply then
+        setOutput(string.format("%%s:%%s", name, reply))
+    end
+]]
 
 function Screen:send(command, payload)
     printf("send: %s %s", command, payload)
