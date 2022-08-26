@@ -22,6 +22,9 @@ local Triangle = {}
 local Color = {}
 local Size = {}
 local Button = {}
+local Font = {}
+local Layer = {}
+local Text = {}
 
 function Point.new(x, y)
     local p = { x = x, y = y}
@@ -156,26 +159,67 @@ function Module:textLineField(lines, rect, fontName, fontSize)
 
 end
 
-function Button.new(label, rect, font)
+function Button.new(label, rect)
     local b = { 
         label = label, 
         rect = rect, 
-        font = font or loadFont("Play", 20) 
     }
 
     setmetatable(b, { __index = Button })
     return b
 end
 
-function Button:draw(layer)
-    self.rect:draw(layer, white, black)
+function Button:drawInLayer(layer)
+    self.rect:draw(layer.layer, white, black)
     local lr = self.rect:inset(2)
-    addText(layer, self.font, self.label, lr.x, lr.y + lr.height)
+    local font = (self.font or layer.defaultFont).font
+    addText(layer.layer, font, self.label, lr.x, lr.y + lr.height)
+end
+
+function Font.new(name, size)
+    local f = { name = name, size = size, font = loadFont(name, size)}
+    setmetatable(f, { __index = Font })
+    return f
+end
+
+function Layer.new()
+    local l = { 
+        layer = createLayer(),
+        widgets = {},
+        defaultFont = Font.new("Play", 20)
+    }
+
+    setmetatable(l, { __index = Layer })
+    return l
+end
+
+function Layer:draw(object)
+    object:drawInLayer(self)
+end
+
+function Layer:render()
+    for i,widget in ipairs(self.widgets) do
+        widget:drawInLayer(self)
+    end
+end
+
+function Layer:addWidget(widget)
+    table.insert(self.widgets, widget)
+end
+
+function Layer:newButton(...)
+    local button = Button.new(...)
+    self:addWidget(button)
+    return button
 end
 
 
-Module.Point = Point
-Module.Rect = Rect
-Module.Color = Color
-Module.Button = Button
+Module.Point = Point.new
+Module.Rect = Rect.new
+Module.Color = Color.new
+Module.Button = Button.new
+Module.Font = Font.new
+Module.Text = Text.new
+Module.Layer = Layer.new
+
 return Module
