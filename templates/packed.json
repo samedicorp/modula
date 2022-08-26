@@ -7,15 +7,15 @@
                 "events": []
             }
         },
-        "-3": {
-            "name": "player",
+        "-2": {
+            "name": "construct",
             "type": {
                 "methods": [],
                 "events": []
             }
         },
-        "-2": {
-            "name": "construct",
+        "-3": {
+            "name": "player",
             "type": {
                 "methods": [],
                 "events": []
@@ -28,13 +28,6 @@
                 "events": []
             }
         },
-        "0": {
-            "name": "core",
-            "type": {
-                "methods": [],
-                "events": []
-            }
-        },
         "-5": {
             "name": "library",
             "type": {
@@ -42,8 +35,15 @@
                 "events": []
             }
         },
+        "0": {
+            "name": "slot1",
+            "type": {
+                "methods": [],
+                "events": []
+            }
+        },
         "1": {
-            "name": "screen",
+            "name": "slot2",
             "type": {
                 "methods": [],
                 "events": []
@@ -132,7 +132,7 @@
                 "signature": "tick(timerId)",
                 "args": [
                     {
-                        "variable": "timerId"
+                        "variable": "*"
                     }
                 ]
             },
@@ -145,7 +145,7 @@
                 "signature": "actionStart(action)",
                 "args": [
                     {
-                        "variable": "action"
+                        "variable": "*"
                     }
                 ]
             },
@@ -158,7 +158,7 @@
                 "signature": "actionStop(action)",
                 "args": [
                     {
-                        "variable": "action"
+                        "variable": "*"
                     }
                 ]
             },
@@ -171,7 +171,7 @@
                 "signature": "actionLoop(action)",
                 "args": [
                     {
-                        "variable": "action"
+                        "variable": "*"
                     }
                 ]
             },
@@ -202,7 +202,7 @@
                 "signature": "inputText(text)",
                 "args": [
                     {
-                        "variable": "text"
+                        "variable": "*"
                     }
                 ]
             },
@@ -216,19 +216,6 @@
                 "args": []
             },
             "code": "%s"
-        },
-        {
-            "key": "10",
-            "filter": {
-                "slotKey": "1",
-                "signature": "onOutputChanged(output)",
-                "args": [
-                    {
-                        "variable": "output"
-                    }
-                ]
-            },
-            "code": "local failure = modula:call(\"onOutputChanged\", output); if failure then error(failure) end"
         }
     ],
     "methods": [],
