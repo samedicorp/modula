@@ -21,6 +21,7 @@ local Rect = {}
 local Triangle = {}
 local Color = {}
 local Size = {}
+local Button = {}
 
 function Point.new(x, y)
     local p = { x = x, y = y}
@@ -155,8 +156,26 @@ function Module:textLineField(lines, rect, fontName, fontSize)
 
 end
 
+function Button.new(label, rect, font)
+    local b = { 
+        label = label, 
+        rect = rect, 
+        font = font or loadFont("Play", 20) 
+    }
+
+    setmetatable(b, { __index = Button })
+    return b
+end
+
+function Button:draw(layer)
+    self.rect:draw(layer, white, black)
+    local lr = self.rect:inset(2)
+    addText(layer, self.font, self.label, lr.x, lr.y + lr.height)
+end
+
+
 Module.Point = Point
 Module.Rect = Rect
 Module.Color = Color
-
+Module.Button = Button
 return Module
