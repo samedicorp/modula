@@ -44,11 +44,14 @@ function Layer:render()
     end
 
     self.over = over
-    if isDown and over then
-        local action = over.action
-        if action then
-            action(cursor, over)
-        end
+    if isDown and over and not clickedWidget then
+        clickedWidget = over
+        clickedWidget:mouseDown(cursor)
+    elseif not isDown and clickedWidget then
+        clickedWidget:mouseUp(cursor)
+        clickedWidget = nil
+    elseif isDown and clickedWidget then
+        clickedWidget:mouseDrag(cursor)
     end
 end
 

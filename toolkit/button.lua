@@ -9,7 +9,7 @@ function Button.new(text, rect, options)
     end
 
     if type(options) == "function" then
-        options = { action = options }
+        options = { onMouseUp = options }
     else
         options = options or {}
     end
@@ -25,7 +25,9 @@ function Button.new(text, rect, options)
     local b = { 
         text = text, 
         rect = rect, 
-        action = options.action,
+        onMouseDown = options.onMouseDown,
+        onMouseDrag = options.onMouseDrag,
+        onMouseUp = options.onMouseUp,
         align = { h = _ENV.AlignH_Center, v = _ENV.AlignV_Baseline },
         drawInLayer = style
     }
@@ -85,6 +87,24 @@ end
 
 function Button:hitTest(point)
     return self.rect:contains(point)
+end
+
+function Button:mouseDown(pos)
+    if self.onMouseDown then
+        self.onMouseDown(pos, self)
+    end
+end
+
+function Button:mouseDrag(pos)
+    if self.onMouseDrag then
+        self.onMouseDrag(pos, self)
+    end
+end
+
+function Button:mouseUp(pos)
+    if self.onMouseUp then
+        self.onMouseUp(pos, self)
+    end
 end
 
 return Button
