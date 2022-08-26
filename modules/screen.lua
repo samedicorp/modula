@@ -17,9 +17,10 @@ end
 -- Example event handlers
 -- ---------------------------------------------------------------------
 
-function Module:registerScreen(handler, name)
+function Module:registerScreen(handler, name, code)
     local modula = self.modula
     local core = modula.core
+    local registered
     modula:withElements("ScreenUnit", function(element)
         local id = element.getLocalId()
         if core.getElementNameById(id) == name then
@@ -32,24 +33,38 @@ function Module:registerScreen(handler, name)
             setmetatable(screen, { __index = Screen })
             self.screens[name] = screen
             local script = [[
-                local render = require('samedicorp.modula.render')
-                local input = getInput()
-                local name = '%s'
-                frame = frame or 0
+frame = frame or 0
+local render = require('samedicorp.modula.render')
+local name = '%s'
+local reply
+local input = getInput()
+local command
+local payload
 
-                local font = loadFont("Play", 20)
-                local layer = createLayer()
-                addText(layer, font, name, 10, 20)
-                addText(layer, font, input, 10, 40)
-                setOutput(name .. ":done")
-            ]]
+if input then
+    local i = input:find(":")
+    if i then
+        command = input:sub(1, i - 1)
+        payload = input:sub(i + 1)
+        reply = "done"
+    end
+end
 
-            element.setRenderScript(script:format(name))
+%s
+
+if reply then
+    setOutput(string.format("%%s:%%s", name, reply))
+end
+]]
+
+            element.setRenderScript(script:format(name, code))
             debugf("Registered screen %s.", name)
-
+            registered = screen
             return screen
         end
     end)
+
+    return registered
 end
 
 function Module:onSlowUpdate()
@@ -67,17 +82,19 @@ function Module:onScreenReply(output)
         local reply = output:sub(i + 1)
         local screen = self.screens[name]
         if screen then
-            screen.handler:onScreenReply(reply)
+            screen:onReply(reply)
         end
     end
 end
 
 
-function Screen:send(command)
-    table.insert(self.buffer, command)
+function Screen:send(command, payload)
+    printf("send: %s %s", command, payload)
+    table.insert(self.buffer, string.format("%s:%s", command, payload or ""))
 end
 
 function Screen:flush()
+    printf("flush %s", self.name)
     local count = #self.buffer
     if count > 0 then
         if not self.sending then
@@ -89,5 +106,16 @@ function Screen:flush()
         end
     end
 end
+
+function Screen:onReply(reply)
+    if self.handler then
+        self.handler:onScreenReply(reply)
+        local count = #self.buffer
+        if count == 0 then
+            self.element.setScriptInput(nil)
+        end
+    end
+end
+
 
 return Module
