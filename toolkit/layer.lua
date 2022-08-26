@@ -47,7 +47,7 @@ function Layer:render()
     if isDown and over then
         local action = over.action
         if action then
-            action()
+            action(cursor, over)
         end
     end
 end
@@ -104,9 +104,9 @@ function Layer:textLineField(lines, rect, font)
     local downFill = Color.black
 
     local s = self.scroll or 0
-    local cx, cy = Screen.default:cursor()
-    if Screen.default:isCursorDown() and (cx > (width - scrollBarWidth)) then
-        if cy > (height / 2) then
+    local cursor = Screen.default:cursor()
+    if Screen.default:isCursorDown() and (cursor.x > (width - scrollBarWidth)) then
+        if cursor.y > (height / 2) then
             self.scroll = s + 1
             downFill = Color.white
         elseif s > 0 then

@@ -3,26 +3,39 @@ local Color = require('samedicorp.modula.toolkit.color')
 
 local Button = {}
 
-function Button.new(text, rect, action)
+function Button.new(text, rect, options)
     if type(text) == "string" then
         text = Text.new(text)
+    end
+
+    if type(options) == "function" then
+        options = { action = options }
+    else
+        options = options or {}
+    end
+
+    local style = options.style
+    if type(style) == "string" then
+        style = Button[style]
+    end
+    if not style then 
+        style = Button.defaultStyle
     end
 
     local b = { 
         text = text, 
         rect = rect, 
-        action = action,
-        align = { h = _ENV.AlignH_Center, v = _ENV.AlignV_Baseline }
+        action = options.action,
+        align = { h = _ENV.AlignH_Center, v = _ENV.AlignV_Baseline },
+        drawInLayer = style
     }
 
-
     setmetatable(b, { __index = Button })
-    b.drawInLayer = b.drawStyle2
 
     return b
 end
 
-function Button:drawStyle1(layer, isOver, isDown)
+function Button:lineStyle(layer, isOver, isDown)
     local stroke
     local fill
     local text
@@ -46,7 +59,7 @@ function Button:drawStyle1(layer, isOver, isDown)
     self.text:drawInLayer(layer, anchor, { fill = text, align = self.align })
 end
 
-function Button:drawStyle2(layer, isOver, isDown)
+function Button:defaultStyle(layer, isOver, isDown)
     local stroke
     local fill
     local text
