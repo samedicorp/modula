@@ -3,6 +3,30 @@
 --  All code (c) 2022, The Samedi Corporation.
 -- -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
+local renderScript = [[
+frame = frame or 0
+local render = require('samedicorp.modula.render')
+local name = '%s'
+local reply
+local input = getInput()
+local command
+local payload
+
+if input then
+    local i = input:find(":")
+    if i then
+        command = input:sub(1, i - 1)
+        payload = input:sub(i + 1)
+    end
+end
+
+%s
+
+if reply then
+    setOutput(string.format("%%s:%%s", name, reply))
+end
+]]
+
 local Module = { }
 local Screen = { }
 
@@ -32,32 +56,10 @@ function Module:registerScreen(handler, name, code)
             }
             setmetatable(screen, { __index = Screen })
             self.screens[name] = screen
-            local script = [[
-frame = frame or 0
-local render = require('samedicorp.modula.render')
-local name = '%s'
-local reply
-local input = getInput()
-local command
-local payload
+            
 
-if input then
-    local i = input:find(":")
-    if i then
-        command = input:sub(1, i - 1)
-        payload = input:sub(i + 1)
-        reply = "done"
-    end
-end
-
-%s
-
-if reply then
-    setOutput(string.format("%%s:%%s", name, reply))
-end
-]]
-
-            element.setRenderScript(script:format(name, code))
+            element.setScriptInput(nil)
+            element.setRenderScript(renderScript:format(name, code))
             debugf("Registered screen %s.", name)
             registered = screen
             return screen
@@ -68,10 +70,8 @@ end
 end
 
 function Module:onSlowUpdate()
-    if not self.sending then
-        for i,screen in ipairs(self.screens) do
-            screen:flush()
-        end
+    for name,screen in pairs(self.screens) do
+        screen:flush()
     end
 end
 
@@ -94,9 +94,9 @@ function Screen:send(command, payload)
 end
 
 function Screen:flush()
-    printf("flush %s", self.name)
     local count = #self.buffer
     if count > 0 then
+        printf("flush %s", self.name)
         if not self.sending then
             self.sending = true
             local line = self.buffer[1]
@@ -110,10 +110,11 @@ end
 function Screen:onReply(reply)
     if self.handler then
         self.handler:onScreenReply(reply)
-        local count = #self.buffer
-        if count == 0 then
+        if #self.buffer == 0 then
             self.element.setScriptInput(nil)
         end
+        self.sending = false
+        self:flush()
     end
 end
 
