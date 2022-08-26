@@ -34,6 +34,10 @@ function Rect:bottomRight()
     return Point.new(self.x + self.width - 1, self.y + self.height - 1)
 end
 
+function Rect:contains(point)
+    return (point.x >= self.x) and (point.y >= self.y) and (point.x < (self.x + self.width)) and (point.y < (self.y + self.height))
+end
+
 function Rect:draw(layer, stroke, fill, width)
     stroke:setNextStroke(layer)
     fill:setNextFill(layer)

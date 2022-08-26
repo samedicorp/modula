@@ -2,6 +2,7 @@ local Button = require('samedicorp.modula.toolkit.button')
 local Color = require('samedicorp.modula.toolkit.color')
 local Font = require('samedicorp.modula.toolkit.font')
 local Label = require('samedicorp.modula.toolkit.label')
+local Point = require('samedicorp.modula.toolkit.point')
 local Rect = require('samedicorp.modula.toolkit.rect')
 local Triangle = require('samedicorp.modula.toolkit.triangle')
 
@@ -27,9 +28,30 @@ function Layer:draw(object)
     object:drawInLayer(self)
 end
 
+function Layer:getCursor()
+    local x,y = getCursor()
+    return Point.new(x, y)
+end
+
 function Layer:render()
+    local cursor = self:getCursor()
+    local isDown = getCursorDown()
+    self.over = nil
+
     for i,widget in ipairs(self.widgets) do
-        widget:drawInLayer(self)
+        local isOver = widget:hitTest(cursor) 
+        if isOver then
+            self.over = widget
+        end
+
+        widget:drawInLayer(self, isOver, isDown)
+    end
+
+    if isDown then
+        local action = self.over.action
+        if action then
+            action()
+        end
     end
 end
 

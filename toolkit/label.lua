@@ -15,4 +15,8 @@ function Label:drawInLayer(layer)
     self.text:drawInLayer(layer, self.x, self.y)
 end
 
+function Label:hitTest(point)
+    return false
+end
+
 return Label
