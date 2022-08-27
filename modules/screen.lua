@@ -10,6 +10,7 @@ local Screen = { }
 
 function Module:register(parameters)
     self.screens = {}
+    self.logIO = parameters.logIO or false
 
     modula:registerForEvents(self, "onScreenReply", "onSlowUpdate")
     modula:registerService(self, "screen")
@@ -85,24 +86,28 @@ Module.renderScript = [[
 function Screen:send(message)
     local encoded = json.encode(message)
     table.insert(self.buffer, encoded)
-    debugf("send: %s", encoded)
 end
 
 function Screen:flush()
     local count = #self.buffer
     if count > 0 then
-        printf("flush %s", self.name)
         if not self.sending then
             self.sending = true
-            local line = self.buffer[1]
+            local payload = self.buffer[1]
             table.remove(self.buffer, 1)
-            self.element.element.setScriptInput(line)
-            system.print("Sent command: " .. line)
+            self.element.element.setScriptInput(payload)
+            if self.logIO then
+                debugf("send: %s", payload)
+            end
         end
     end
 end
 
 function Screen:onReply(reply)
+    if self.logIO then
+        debugf("receive: %s", reply)
+    end
+    
     if self.handler then
         self.handler:onScreenReply(reply)
         if #self.buffer == 0 then
