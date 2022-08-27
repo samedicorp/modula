@@ -151,9 +151,11 @@ actions = {
 
 ## Existing Modules
 
-### Ported Modules
-- panels: manages panels and widgets
-- windows: allows you to display "windows" on the screen
+- panels: Implements a panel-management service, with a clean API for creating panels, adding widgets to them, updating them, showing/hiding them dynamically.
+- windows: Implements a service that allows you to display "windows" on the screen. Each window is a chunk of html/svg. The service registers timers and sends events which other modules can register for to update their window content, and then collates all the content and places it on the screen.
+- console: This module uses a linked screen as a debug console. All output from the modula `debugf` and `printf` functions is echoed to the screen. Useful for the development.
+- screen: Implements a service which supports an input/output loop for screens. You can use the service to send a table to a screen. The service automatically encodes the table as json, and installs lua into the screen which decodes the json back into a table. Output from the screen back to the client module is handled in the same manner. When you use the service to link to a screen you supply some custom lua which is handed the input table and can pass back an output table.
+
 
 ### UI Modules Which Will Likely Be Ported
 - airspeed

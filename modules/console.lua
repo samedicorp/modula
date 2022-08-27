@@ -17,7 +17,6 @@
 local Module = {}
 
 function Module:register(parameters)
-    printf("wibble")
     modula:registerForEvents(self, "onConsoleOutput", "onSlowUpdate")
 
     self.buffer = {}
