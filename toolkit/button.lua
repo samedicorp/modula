@@ -1,7 +1,9 @@
 local Text = require('samedicorp.modula.toolkit.text')
 local Color = require('samedicorp.modula.toolkit.color')
+local Widget = require('samedicorp.modula.toolkit.widget')
 
 local Button = {}
+setmetatable(Button, { __index = Widget })
 
 function Button.new(text, rect, options)
     if type(text) == "string" then

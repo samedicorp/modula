@@ -3,6 +3,7 @@
 --  All code (c) 2022, The Samedi Corporation.
 -- -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
+local Bar = require('samedicorp.modula.toolkit.bar')
 local Button = require('samedicorp.modula.toolkit.button')
 local Color = require('samedicorp.modula.toolkit.color')
 local Font = require('samedicorp.modula.toolkit.font')
@@ -18,12 +19,14 @@ local createLayer = _ENV.createLayer
 local addText = _ENV.addText
 local requestAnimationFrame = _ENV.requestAnimationFrame
 
-function Layer.new()
+function Layer.new(rect)
+    local screen = Screen.default
     local l = { 
+        rect = rect or screen:safeRect(),
         layer = createLayer(),
         widgets = {},
         defaultFont = Font.new("Play", 20),
-        screen = Screen.default
+        screen = screen
     }
 
     setmetatable(l, { __index = Layer })
@@ -76,6 +79,11 @@ function Layer:addLabel(...)
     return label
 end
 
+function Layer:addBar(...)
+    local bar = Bar.new(...)
+    self:addWidget(bar)
+    return bar
+end
 
 function Layer:scheduleRefresh()
     local rate

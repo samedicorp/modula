@@ -5,7 +5,10 @@
 
 local Point = require('samedicorp.modula.toolkit.point')
 local Text = require('samedicorp.modula.toolkit.text')
+local Widget = require('samedicorp.modula.toolkit.widget')
+
 local Label = {}
+setmetatable(Label, { __index = Widget })
 
 function Label.new(text, xOrPosition, y)
     if type(text) == "string" then
@@ -25,10 +28,6 @@ end
 
 function Label:drawInLayer(layer)
     self.text:drawInLayer(layer, self.position)
-end
-
-function Label:hitTest(point)
-    return false
 end
 
 return Label
