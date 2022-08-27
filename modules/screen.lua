@@ -3,6 +3,8 @@
 --  All code (c) 2022, The Samedi Corporation.
 -- -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
+local json = require('dkjson')
+
 local Module = { }
 local Screen = { }
 
@@ -51,43 +53,39 @@ function Module:onSlowUpdate()
 end
 
 function Module:onScreenReply(output)
-    local i = output:find(":")
-    if i then
-        local name = output:sub(1, i - 1)
-        local reply = output:sub(i + 1)
-        local screen = self.screens[name]
+    local decoded = json.decode(output)
+    if decoded then
+        local screen = self.screens[decoded.name]
         if screen then
-            screen:onReply(reply)
+            screen:onReply(decoded)
         end
     end
 end
 
 Module.renderScript = [[
+    local json = require('dkjson')
     frame = (frame or 0) + 1
     local name = '%s'
-    local reply
-    local input = getInput()
-    local command
     local payload
+    local reply
     
+    local input = getInput()
     if input then
-        local i = input:find(":")
-        if i then
-            command = input:sub(1, i - 1)
-            payload = input:sub(i + 1)
-        end
+        payload = json.decode(input)
     end
     
     %s
     
     if reply then
-        setOutput(string.format("%%s:%%s", name, reply))
+        local encoded = json.encode(reply)
+        setOutput(encoded)
     end
 ]]
 
-function Screen:send(command, payload)
-    printf("send: %s %s", command, payload)
-    table.insert(self.buffer, string.format("%s:%s", command, payload or ""))
+function Screen:send(message)
+    local encoded = json.encode(message)
+    table.insert(self.buffer, encoded)
+    debugf("send: %s", encoded)
 end
 
 function Screen:flush()
