@@ -58,7 +58,7 @@ function Module:onStop()
 end
 
 function Module:onFastUpdate()
-   self.modula:call("onUpdateWindows", self)
+   modula:call("onUpdateWindows", self)
 
    local loggingEnabled = self.logChanges
    if loggingEnabled then

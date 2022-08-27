@@ -14,4 +14,16 @@ end
 function traceback()
 end
 
+function log(...)
+end
+
+function warning(...)
+end
+
+function fail(...)
+end
+
 modula = {}
+player = {}
+system = {}
+unit = {}
