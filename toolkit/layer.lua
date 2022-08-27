@@ -1,3 +1,8 @@
+-- -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+--  Created by Samedi on 27/08/2022.
+--  All code (c) 2022, The Samedi Corporation.
+-- -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
 local Button = require('samedicorp.modula.toolkit.button')
 local Color = require('samedicorp.modula.toolkit.color')
 local Font = require('samedicorp.modula.toolkit.font')
