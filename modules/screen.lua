@@ -10,7 +10,7 @@ local Screen = { }
 
 function Module:register(parameters)
     self.screens = {}
-    self.logIO = parameters.logIO or false
+    self.logIO = parameters.logIO or true
 
     modula:registerForEvents(self, "onScreenReply", "onSlowUpdate")
     modula:registerService(self, "screen")
@@ -30,7 +30,8 @@ function Module:registerScreen(handler, name, code)
                 name = screenName,
                 element = element,
                 buffer = {},
-                handler = handler
+                handler = handler,
+                logIO = self.logIO
             }
             setmetatable(screen, { __index = Screen })
             self.screens[screenName] = screen
@@ -54,11 +55,16 @@ function Module:onSlowUpdate()
 end
 
 function Module:onScreenReply(output)
+    if self.logIO then
+        debugf("receive: %s", output)
+    end
+    
     local decoded = json.decode(output)
     if decoded then
-        local screen = self.screens[decoded.name]
+        for k,v in pairs(self.screens) do printf(k) end
+        local screen = self.screens[decoded.target]
         if screen then
-            screen:onReply(decoded)
+            screen:onReply(decoded.payload)
         end
     end
 end
@@ -78,8 +84,16 @@ Module.renderScript = [[
     %s
     
     if reply then
-        local encoded = json.encode(reply)
-        setOutput(encoded)
+        local payload = { target = name, payload = reply }
+        local status, result = pcall(json.encode, payload)
+        if status then
+            local escaped = result:gsub("\"", "\\\"")
+            setOutput(escaped)
+        else
+            logMessage("error")
+            logMessage(result)
+            setOutput(result)
+        end
     end
 ]]
 
@@ -104,10 +118,6 @@ function Screen:flush()
 end
 
 function Screen:onReply(reply)
-    if self.logIO then
-        debugf("receive: %s", reply)
-    end
-    
     if self.handler then
         self.handler:onScreenReply(reply)
         if #self.buffer == 0 then
