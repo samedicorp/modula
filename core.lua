@@ -28,6 +28,7 @@ function ModulaCore.new(system, library, player, construct, unit, settings)
         logElements = settings.logElements or false,
         logCalls = settings.logCalls or false,
         logActions = settings.logActions or false,
+        logRegistrations = settings.logRegistrations or false,
         timers = {},
         handlers = {},
         loopRepeat = 0.6,
@@ -104,7 +105,9 @@ function ModulaCore:registerForEvents(object, ...)
         if not object[handler] then
             warning("Module %s does not have a handler for %s", object.name, handler)
         else
-            debugf("Registering %s for event %s", object.name, handler)
+            if self.logRegistrations then
+                debugf("Registering %s for event %s", object.name, handler)
+            end
             local registered = self.handlers[handler]
             if registered then
                 table.insert(registered, object)
@@ -178,7 +181,9 @@ end
 -- ---------------------------------------------------------------------
 
 function ModulaCore:registerService(module, name)
-    debugf("Registered %s as service %s", module.name, name)
+    if self.logRegistrations then
+        debugf("Registered %s as service %s", module.name, name)
+    end
     self.services[name] = module
 end
 
@@ -201,15 +206,17 @@ end
 function ModulaCore:registerModule(name, parameters)
     local prototype = self:loadModule(name)
     if prototype then
-        debugf("Registering module: %s", name)
-        local module = { modula = self }
+        if self.logRegistrations then
+            debugf("Registering module: %s", name)
+        end
+        local module = { }
         setmetatable(module, { __index = prototype })
 
         table.insert(self.modules, module)
         table.insert(self.moduleNames, name)
         self.moduleIndex[name] = module
 
-        module:register(self, parameters)
+        module:register(parameters)
     else
         warning("Can't find module %s", name)
     end
@@ -477,6 +484,8 @@ function ModulaCore:setupGlobals(system, library, player, construct, unit)
     _G.player = _G.player or player
     _G.construct = _G.construct or construct
 
+    _G.modula = self
+    
     _G.toString = function(item)
         if type(item) == "table" then
             local text = {}

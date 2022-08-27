@@ -6,7 +6,7 @@
 local Module = { }
 local Screen = { }
 
-function Module:register(modula, parameters)
+function Module:register(parameters)
     self.screens = {}
 
     modula:registerForEvents(self, "onScreenReply", "onSlowUpdate")
@@ -18,7 +18,6 @@ end
 -- ---------------------------------------------------------------------
 
 function Module:registerScreen(handler, name, code)
-    local modula = self.modula
     local core = modula.core
     local registered
     modula:withElements("ScreenUnit", function(element)

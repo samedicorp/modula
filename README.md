@@ -96,7 +96,7 @@ These modules can register themselves with the core:
 Any other module that needs the "panels" service can find it, without having to know exactly what module is providing it:
 
 ```lua
-    local panels = self.modula:getService("panels")
+    local panels = modula:getService("panels")
 ```
 
 This provides full decoupling between the service and its implementation. 

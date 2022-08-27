@@ -16,17 +16,18 @@
 
 local Module = {}
 
-function Module:register(modula, parameters)
+function Module:register(parameters)
+    printf("wibble")
     modula:registerForEvents(self, "onConsoleOutput", "onSlowUpdate")
 
     self.buffer = {}
     local name = parameters.name
     if name then
-        self:connectTo(modula, name)
+        self:connectTo(name)
     end
 end
 
-function Module:connectTo(modula, name)
+function Module:connectTo(name)
     modula:withElements("ScreenUnit", function(element)
         if element:name() == name then
             self.console = element.element

@@ -7,7 +7,7 @@ local Module = {}
 local Widget = {}
 local Panel = {}
 
-function Module:register(modula, parameters)
+function Module:register(parameters)
     modula:registerForEvents(self, "onStart", "onStop")
     modula:registerService(self, "panels")
 
