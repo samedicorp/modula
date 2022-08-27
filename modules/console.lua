@@ -19,6 +19,7 @@ local Module = {}
 function Module:register(modula, parameters)
     modula:registerForEvents(self, "onConsoleOutput", "onSlowUpdate")
 
+    self.buffer = {}
     local name = parameters.name
     if name then
         self:connectTo(modula, name)
@@ -26,18 +27,15 @@ function Module:register(modula, parameters)
 end
 
 function Module:connectTo(modula, name)
-    local core = modula.core
     modula:withElements("ScreenUnit", function(element)
-        local id = element.getLocalId()
-        if core.getElementNameById(id) == name then
-            self.console = element
-            self.buffer = {}
+        if element:name() == name then
+            self.console = element.element
             self.sysPrint = modula.rawPrint
             modula.rawPrint = function(text)
                 self.sysPrint(text)
                 table.insert(self.buffer, text)
             end
-            element.setRenderScript([[
+            element.element.setRenderScript([[
                 local render = require('samedicorp.modula.render')
                 frame = frame or 0
                 buffer = buffer or {}

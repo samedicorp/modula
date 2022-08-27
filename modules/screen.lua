@@ -3,8 +3,6 @@
 --  All code (c) 2022, The Samedi Corporation.
 -- -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-
-
 local Module = { }
 local Screen = { }
 
@@ -24,23 +22,23 @@ function Module:registerScreen(handler, name, code)
     local core = modula.core
     local registered
     modula:withElements("ScreenUnit", function(element)
-        local id = element.getLocalId()
-        if core.getElementNameById(id) == name then
+        local screenName = element:name()
+        if (not name) or (screenName == name) then
             local screen = {
-                name = name,
+                name = screenName,
                 element = element,
                 buffer = {},
                 handler = handler
             }
             setmetatable(screen, { __index = Screen })
-            self.screens[name] = screen
+            self.screens[screenName] = screen
             
-
-            element.setScriptInput(nil)
-            element.setRenderScript(self.renderScript:format(name, code))
-            debugf("Registered screen %s.", name)
+            local du = element.element
+            du.setScriptInput(nil)
+            du.setRenderScript(self.renderScript:format(screenName, code))
+            debugf("Registered screen %s.", screenName)
             registered = screen
-            return screen
+            return true
         end
     end)
 
@@ -101,7 +99,7 @@ function Screen:flush()
             self.sending = true
             local line = self.buffer[1]
             table.remove(self.buffer, 1)
-            self.element.setScriptInput(line)
+            self.element.element.setScriptInput(line)
             system.print("Sent command: " .. line)
         end
     end
@@ -111,7 +109,8 @@ function Screen:onReply(reply)
     if self.handler then
         self.handler:onScreenReply(reply)
         if #self.buffer == 0 then
-            self.element.setScriptInput(nil)
+            self.element.element.setScriptInput(nil)
+            self.element.element.clearScriptOutput()
         end
         self.sending = false
         self:flush()

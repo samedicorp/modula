@@ -1,7 +1,7 @@
--- -=core.lua-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
---  Created by Samedi on 20/08/2022.
+-- -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+--  Created by Samedi on 25/08/2022.
 --  All code (c) 2022, The Samedi Corporation.
--- -=core.lua-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+-- -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 ModulaCore = {
     class = "ModulaCore"
@@ -243,19 +243,48 @@ end
 -- Elements
 -- ---------------------------------------------------------------------
 
+Element = {}
+
+function Element:name()
+    return self.core.getElementNameById(self.id)
+end
+
 function ModulaCore:loadElements()
     local all = self:allElements()
-    local elements = self:categoriseElements(all)
-    local cores = elements.CoreUnitStatic or elements.CoreUnitDynamic or
-                      elements.CoreUnitSpace
+    local categorised = self:categoriseElements(all)
+    local cores = categorised.CoreUnitStatic or categorised.CoreUnitDynamic or
+    categorised.CoreUnitSpace
     if cores and (#cores > 0) then
-        self.core = cores[1]
+        local core = cores[1] 
+        self.core = core
+        self.elements = self:makeElementObjects(categorised, core)
     else
         warning("Core not found. Need to link the core to the controller.")
+        self.elements = {}
     end
 
-    self.elements = elements
     self.settings = self:findElement("DataBankUnit")
+end
+
+function ModulaCore:makeElementObjects(index, core)
+    local result = {}
+    local all = {}
+    for category, elements in pairs(index) do
+        local objects = {}
+        for i,element in ipairs(elements) do
+            local object = { element = element, id = element.getLocalId(), core = core }
+            setmetatable(object, { __index = Element })
+            table.insert(objects, object)
+            table.insert(all, object)
+        end
+        result[category] = objects
+        if self.logElements then
+            debugf("Found %s %s.", #objects, category)
+        end
+    end
+
+    result.all = all
+    return result
 end
 
 function ModulaCore:allElements()
@@ -281,11 +310,6 @@ function ModulaCore:categoriseElements(elements)
         table.insert(classElements, element)
     end
 
-    if self.logElements then
-        for k, v in pairs(categorised) do debugf("Found %s %s.", #v, k) end
-    end
-
-    categorised.all = elements
     return categorised
 end
 
@@ -301,7 +325,11 @@ end
 function ModulaCore:withElements(category, action)
     local elements = self.elements[category]
     if elements then
-        for i, element in ipairs(elements) do action(element, i) end
+        for i, element in ipairs(elements) do 
+            if action(element, i) then
+                break
+            end
+        end
     end
 end
 
