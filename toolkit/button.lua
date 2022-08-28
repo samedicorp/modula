@@ -1,5 +1,11 @@
-local Text = require('samedicorp.modula.toolkit.text')
+-- -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+--  Created by Samedi on 28/08/2022.
+--  All code (c) 2022, The Samedi Corporation.
+-- -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+local Align = require('samedicorp.modula.toolkit.align')
 local Color = require('samedicorp.modula.toolkit.color')
+local Text = require('samedicorp.modula.toolkit.text')
 local Widget = require('samedicorp.modula.toolkit.widget')
 
 local Button = {}
@@ -30,7 +36,7 @@ function Button.new(text, rect, options)
         onMouseDown = options.onMouseDown,
         onMouseDrag = options.onMouseDrag,
         onMouseUp = options.onMouseUp,
-        align = { h = _ENV.AlignH_Center, v = _ENV.AlignV_Baseline },
+        align = { h = Align.center, v = Align.middle },
         drawInLayer = style
     }
 
@@ -59,8 +65,7 @@ function Button:lineStyle(layer, isOver, isDown)
 
     self.rect:draw(layer.layer, stroke, fill, { radius = 8.0 })
     local lr = self.rect:inset(2)
-    local anchor = lr:bottomMid()
-    self.text:drawInLayer(layer, anchor, { fill = text, align = self.align })
+    self.text:drawInLayer(layer, lr, { fill = text, align = self.align })
 end
 
 function Button:defaultStyle(layer, isOver, isDown)
@@ -83,30 +88,8 @@ function Button:defaultStyle(layer, isOver, isDown)
 
     self.rect:draw(layer.layer, stroke, fill)
     local lr = self.rect:inset(2)
-    local anchor = lr:bottomMid()
-    self.text:drawInLayer(layer, anchor, { fill = text, align = self.align })
+    self.text:drawInLayer(layer, lr, { fill = text, align = self.align })
 end
 
-function Button:hitTest(point)
-    return self.rect:contains(point)
-end
-
-function Button:mouseDown(pos)
-    if self.onMouseDown then
-        self.onMouseDown(pos, self)
-    end
-end
-
-function Button:mouseDrag(pos)
-    if self.onMouseDrag then
-        self.onMouseDrag(pos, self)
-    end
-end
-
-function Button:mouseUp(pos)
-    if self.onMouseUp then
-        self.onMouseUp(pos, self)
-    end
-end
 
 return Button

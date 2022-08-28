@@ -11,7 +11,7 @@ local addBox = _ENV.addBox
 local setNextStrokeWidth = _ENV.setNextStrokeWidth
 
 function Rect.new(x, y, w, h)
-    local r = { x = x, y = y, width = w, height = h }
+    local r = { x = x, y = y, width = w or 0, height = h or 0 }
     setmetatable(r, { __index = Rect })
     return r
 end
@@ -23,20 +23,40 @@ function Rect:inset(l,t,r,b)
     return self.new(self.x + l, self.y + t, self.width - (l + r), self.height - (t + b))
 end
 
+function right()
+    return self.x + self.width - 1
+end
+
+function bottom()
+    return self.y + self.height - 1
+end
+
 function Rect:topLeft()
     return Point.new(self.x, self.y)
 end
 
-function Rect:topRight()
-    return Point.new(self.x + self.width - 1, self.y)
+function Rect:midLeft()
+    return self:topLeft():mid(self:bottomLeft())
 end
 
 function Rect:bottomLeft()
     return Point.new(self.x, self.y + self.height - 1)
 end
 
+function Rect:topRight()
+    return Point.new(self.x + self.width - 1, self.y)
+end
+
+function Rect:midRight()
+    return self:topRight():mid(self:bottomRight())
+end
+
 function Rect:bottomRight()
     return Point.new(self.x + self.width - 1, self.y + self.height - 1)
+end
+
+function Rect:topMid()
+    return self:topLeft():mid(self:topRight())
 end
 
 function Rect:bottomMid()

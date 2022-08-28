@@ -5,6 +5,11 @@
 
 local Module = {}
 
+function printf(format, ...)
+    logMessage(string.format(tostring(format), ...))
+end
+
+
 local getInput = _ENV.getInput
 local requestAnimationFrame = _ENV.requestAnimationFrame
 local addBox = _ENV.addBox
