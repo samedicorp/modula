@@ -38,6 +38,10 @@ function Layer:draw(object)
 end
 
 function Layer:render()
+    local r = self.rect
+    setLayerClipRect(self.layer, 0, 0, r.width, r.height)
+    setLayerTranslation(self.layer, r.x, r.y)
+
     local cursor = self.screen:cursor()
     local isDown = self.screen:isCursorDown()
     local over
