@@ -47,8 +47,6 @@ function Text:drawInLayer(layer, rect, explicitOptions)
         position.y = rect:midLeft().y
     end
 
-    printf(align.h)
-    printf(align.v)
     setNextTextAlign(layer.layer, align.h, align.v)
     addText(layer.layer, font, self.text, position.x, position.y)
 end

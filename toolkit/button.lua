@@ -11,7 +11,7 @@ local Widget = require('samedicorp.modula.toolkit.widget')
 local Button = {}
 setmetatable(Button, { __index = Widget })
 
-function Button.new(text, rect, options)
+function Button.new(rect, text, options)
     if type(text) == "string" then
         text = Text.new(text)
     end

@@ -9,6 +9,7 @@ function printf(format, ...)
     logMessage(string.format(tostring(format), ...))
 end
 
+debugf = printf
 
 local getInput = _ENV.getInput
 local requestAnimationFrame = _ENV.requestAnimationFrame
