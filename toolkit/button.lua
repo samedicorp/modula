@@ -9,6 +9,7 @@ local Text = require('samedicorp.modula.toolkit.text')
 local Widget = require('samedicorp.modula.toolkit.widget')
 
 local Button = {}
+
 setmetatable(Button, { __index = Widget })
 
 function Button.new(rect, text, options)
@@ -37,12 +38,23 @@ function Button.new(rect, text, options)
         onMouseDrag = options.onMouseDrag,
         onMouseUp = options.onMouseUp,
         align = { h = Align.center, v = Align.middle },
-        drawInLayer = style
+        drawInLayer = style,
+        labelInset = options.labelInset or 2,
+        fitText = options.fitText or true
     }
 
     setmetatable(b, { __index = Button })
 
     return b
+end
+
+function Button:autoSize(layer)
+    if self.fitText then
+        local padding = self.labelInset * 2
+        local w,h = self.text:sizeInLayer(layer)
+        self.rect.width = w + padding
+        self.rect.height = h + padding
+    end
 end
 
 function Button:lineStyle(layer, isOver, isDown)
@@ -63,8 +75,9 @@ function Button:lineStyle(layer, isOver, isDown)
         fill = Color.black
     end
 
+    self:autoSize(layer)
     self.rect:draw(layer.layer, stroke, fill, { radius = 8.0 })
-    local lr = self.rect:inset(2)
+    local lr = self.rect:inset(self.labelInset)
     self.text:drawInLayer(layer, lr, { fill = text, align = self.align })
 end
 
@@ -86,8 +99,9 @@ function Button:defaultStyle(layer, isOver, isDown)
         fill = Color.black
     end
 
+    self:autoSize(layer)
     self.rect:draw(layer.layer, stroke, fill)
-    local lr = self.rect:inset(2)
+    local lr = self.rect:inset(self.labelInset)
     self.text:drawInLayer(layer, lr, { fill = text, align = self.align })
 end
 

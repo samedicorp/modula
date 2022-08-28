@@ -9,6 +9,7 @@ local Text = {}
 
 local addText = _ENV.addText
 local setNextTextAlign = _ENV.setNextTextAlign
+local getTextBounds = _ENV.getTextBounds
 
 function Text.new(text, font, color, options)
     options = options or {}
@@ -21,6 +22,11 @@ function Text.new(text, font, color, options)
 
     setmetatable(t, { __index = Text })
     return t
+end
+
+function Text:sizeInLayer(layer)
+    local font = (self.font or layer.defaultFont).font
+    return getTextBounds(font, self.text)
 end
 
 function Text:drawInLayer(layer, rect, explicitOptions)
