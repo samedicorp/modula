@@ -14,6 +14,7 @@ setmetatable(Label, { __index = Widget })
 function Label.new(rect, text)
     local l = { text = Text.asText(text), rect = Rect.asRect(rect) }
     setmetatable(l, { __index = Label })
+    Widget.init(l)
     return l
 end
 

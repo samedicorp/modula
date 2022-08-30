@@ -41,6 +41,7 @@ function Button.new(rect, text, options)
     }
 
     setmetatable(b, { __index = Button })
+    Widget.init(b)
 
     return b
 end
