@@ -1,8 +1,8 @@
 
 require('api')
 
-local Layer = require('samedicorp.modula.toolkit.layer')
-local Render = require('samedicorp.modula.render')
+local Layer = require('samedicorp.toolkit.layer')
+local Render = require('samedicorp.toolkit')
 
 
 function love.draw()

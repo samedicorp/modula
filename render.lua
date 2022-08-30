@@ -18,15 +18,15 @@ local setNextStrokeWidth = _ENV.setNextStrokeWidth
 local getRenderCost = _ENV.getRenderCost
 local getRenderCostMax = _ENV.getRenderCostMax
 
-local Button = require('samedicorp.modula.toolkit.button')
-local Color = require('samedicorp.modula.toolkit.color')
-local Font = require('samedicorp.modula.toolkit.font')
-local Point = require('samedicorp.modula.toolkit.point')
-local Label = require('samedicorp.modula.toolkit.label')
-local Layer = require('samedicorp.modula.toolkit.layer')
-local Rect = require('samedicorp.modula.toolkit.rect')
-local Text = require('samedicorp.modula.toolkit.text')
-local Triangle = require('samedicorp.modula.toolkit.triangle')
+local Button = require('samedicorp.toolkit.button')
+local Color = require('samedicorp.toolkit.color')
+local Font = require('samedicorp.toolkit.font')
+local Point = require('samedicorp.toolkit.point')
+local Label = require('samedicorp.toolkit.label')
+local Layer = require('samedicorp.toolkit.layer')
+local Rect = require('samedicorp.toolkit.rect')
+local Text = require('samedicorp.toolkit.text')
+local Triangle = require('samedicorp.toolkit.triangle')
 
 function Module:screenRect()
     local width, height = getResolution()

@@ -36,7 +36,7 @@ function Module:connectTo(name)
                 table.insert(self.buffer, text)
             end
             element.element.setRenderScript([[
-                local render = require('samedicorp.modula.render')
+                local render = require('samedicorp.toolkit.toolkit')
                 frame = frame or 0
                 buffer = buffer or {}
                 local input = getInput()
