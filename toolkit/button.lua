@@ -5,6 +5,7 @@
 
 local Align = require('samedicorp.modula.toolkit.align')
 local Color = require('samedicorp.modula.toolkit.color')
+local Rect = require('samedicorp.modula.toolkit.rect')
 local Text = require('samedicorp.modula.toolkit.text')
 local Widget = require('samedicorp.modula.toolkit.widget')
 
@@ -13,10 +14,6 @@ local Button = {}
 setmetatable(Button, { __index = Widget })
 
 function Button.new(rect, text, options)
-    if type(text) == "string" then
-        text = Text.new(text)
-    end
-
     if type(options) == "function" then
         options = { onMouseUp = options }
     else
@@ -32,8 +29,8 @@ function Button.new(rect, text, options)
     end
 
     local b = { 
-        text = text, 
-        rect = rect, 
+        text = Text.asText(text), 
+        rect = Rect.asRect(rect), 
         onMouseDown = options.onMouseDown,
         onMouseDrag = options.onMouseDrag,
         onMouseUp = options.onMouseUp,

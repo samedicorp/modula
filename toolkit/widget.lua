@@ -3,7 +3,7 @@
 --  All code (c) 2022, The Samedi Corporation.
 -- -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-local Widget = {}
+local Widget = { class = "widget" }
 
 function Widget:hitTest(point)
     return self.rect:contains(point)

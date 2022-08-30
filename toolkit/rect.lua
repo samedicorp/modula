@@ -5,7 +5,7 @@
 
 local Point = require('samedicorp.modula.toolkit.point')
 
-local Rect = {}
+local Rect = { class = "rect" }
 
 local addBox = _ENV.addBox
 local setNextStrokeWidth = _ENV.setNextStrokeWidth
@@ -13,6 +13,13 @@ local setNextStrokeWidth = _ENV.setNextStrokeWidth
 function Rect.new(x, y, w, h)
     local r = { x = x, y = y, width = w or 0, height = h or 0 }
     setmetatable(r, { __index = Rect })
+    return r
+end
+
+function Rect.asRect(r)
+    if not r.class then
+        r = Rect.new(r[1], r[2], r[3], r[4])
+    end
     return r
 end
 

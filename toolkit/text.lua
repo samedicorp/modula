@@ -24,6 +24,13 @@ function Text.new(text, font, color, options)
     return t
 end
 
+function Text.asText(text)
+    if type(text) == "string" then
+        text = Text.new(text)
+    end
+    return text
+end
+
 function Text:sizeInLayer(layer)
     local font = (self.font or layer.defaultFont).font
     return getTextBounds(font, self.text)

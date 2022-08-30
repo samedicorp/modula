@@ -4,6 +4,7 @@
 -- -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 local Point = require('samedicorp.modula.toolkit.point')
+local Rect = require('samedicorp.modula.toolkit.rect')
 local Text = require('samedicorp.modula.toolkit.text')
 local Widget = require('samedicorp.modula.toolkit.widget')
 
@@ -11,11 +12,7 @@ local Label = {}
 setmetatable(Label, { __index = Widget })
 
 function Label.new(rect, text)
-    if type(text) == "string" then
-        text = Text.new(text)
-    end
-
-    local l = { text = text, rect = rect }
+    local l = { text = Text.asText(text), rect = Rect.asRect(rect) }
     setmetatable(l, { __index = Label })
     return l
 end
