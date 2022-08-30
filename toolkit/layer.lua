@@ -12,8 +12,10 @@ local Point = require('samedicorp.modula.toolkit.point')
 local Rect = require('samedicorp.modula.toolkit.rect')
 local Screen = require('samedicorp.modula.toolkit.screen')
 local Triangle = require('samedicorp.modula.toolkit.triangle')
+local Widget = require('samedicorp.modula.toolkit.widget')
 
-local Layer = {}
+local Layer = { }
+setmetatable(Layer, { __index = Widget })
 
 local createLayer = _ENV.createLayer
 local addText = _ENV.addText
@@ -28,6 +30,7 @@ function Layer.new(rect)
         defaultFont = Font.new("Play", 20),
         screen = screen
     }
+    Widget.init(l)
 
     setmetatable(l, { __index = Layer })
     return l
@@ -44,18 +47,10 @@ function Layer:render()
 
     local cursor = self.screen:cursor()
     local isDown = self.screen:isCursorDown()
-    local over
 
-    for i,widget in ipairs(self.widgets) do
-        local isOver = widget:hitTest(cursor) 
-        if isOver then
-            over = widget
-        end
-
-        widget:drawInLayer(self, isOver, isDown)
-    end
-
+    local over = self:renderAll(self, cursor, isDown)
     self.over = over
+
     if isDown and over and not clickedWidget then
         clickedWidget = over
         clickedWidget:mouseDown(cursor)
@@ -67,9 +62,6 @@ function Layer:render()
     end
 end
 
-function Layer:addWidget(widget)
-    table.insert(self.widgets, widget)
-end
 
 function Layer:addButton(...)
     local button = Button.new(...)

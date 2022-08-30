@@ -11,8 +11,9 @@ local Bar = {}
 setmetatable(Bar, { __index = Widget })
 
 function Bar.new(rect, value)
-    local b = { rect = rect, value = value }
+    local b = { rect = Rect.asRect(rect), value = value }
     setmetatable(b, { __index = Bar })
+    Widget.init(b)
     return b
 end
 
