@@ -20,7 +20,7 @@ function Module:register(parameters)
 
     self.monitorContent = parameters.monitorContent or false
     self.containers = {}
-    
+
     modula:registerService(self, "containers")
     modula:registerForEvents(self, "onStart", "onStop", "onSlowUpdate")
 
@@ -79,29 +79,16 @@ function Module:findContainers(...)
 end
 
 function Module:checkForChanges()
-    printf("check for changes %s", self)
     for i,container in ipairs(self.containers) do
-        printf("blah")
         local element = container.element
-        printf("blah")
         local content = element.getContent()
-        printf("blah")
         local volume = element.getItemsVolume()
-        printf("blah")
         local max = element.getMaxVolume()
-        printf("blah")
         local percentage = volume / max 
-        printf("blah")
         if container.percentage ~= percentage then
-            printf("wibble")
             container.percentage = percentage
-            printf("wibble")
             container.volume = volume
-            printf("wibble")
             container.max = max
-            printf("wibble")
-            for k,v in pairs(container) do printf("%s:%s", k,v) end
-            printf("calling container changed")
             modula:call("onContainerChanged", container)
         end
     end
