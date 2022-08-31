@@ -155,6 +155,7 @@ actions = {
 - **windows**: Implements a service that allows you to display "windows" on the screen. Each window is a chunk of html/svg. The service registers timers and sends events which other modules can register for to update their window content, and then collates all the content and places it on the screen.
 - **console**: This module uses a linked screen as a debug console. All output from the modula `debugf` and `printf` functions is echoed to the screen. Useful for the development.
 - **screen**: Implements a service which supports an input/output loop for screens. You can use the service to send a table to a screen. The service automatically encodes the table as json, and installs lua into the screen which decodes the json back into a table. Output from the screen back to the client module is handled in the same manner. When you use the service to link to a screen you supply some custom lua which is handed the input table and can pass back an output table.
+- **containers**: This module tracks any containers connected to the core, and sends out an onContainerChanged event when their contents or fullness changes. The container fullness is calculated as a percentage of the max volume. The module also optionally requests the actual contents from the containers, which uses a rate-limited API, and manages collating the responses. Clients of this service send the module a list of the container classes that they are interested in, and then listen for onContainerChanged events.
 
 
 ### UI Modules Which Will Likely Be Ported
