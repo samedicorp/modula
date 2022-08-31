@@ -4,6 +4,7 @@ require("configure")
 local root = arg[1]
 local source = {}
 local config = modulaSettings
+local templatesRoot = config.templates or "samedicorp/modula/templates"
 
 function lastPathComponent(path)
     local items = path:split('/')
@@ -70,13 +71,12 @@ end
 
 function writeTemplate(format, ...)
   local path = string.format("%sautoconf/custom/%s.%s", root, config.name, format)
-  local template = load(string.format("%ssamedicorp/modula/templates/packed.%s", root, format))
+  local template = load(string.format("%s%s/packed.%s", root, templatesRoot, format))
   save(path, string.format(template, ...))
   print(string.format("Exported %s.%s", config.name, format))
 
   return path
 end
-
 
 print(string.format("Building %s", config.name))
 appendSource(root .. "samedicorp/modula/core.lua", "core")
@@ -89,6 +89,8 @@ local configIndented = indented(configSource, "        ")
 local moduleSource = table.concat(source, "\n")
 local moduleEscaped = jsonEscaped(moduleSource)
 local moduleIndented = indented(moduleSource, "        ")
+
+print(string.format("Using templates from %s.", templatesRoot))
 
 -- writeTemplate("lua", moduleSource, configSource)
 local jsonPath = writeTemplate("json", configEscaped, moduleEscaped)
