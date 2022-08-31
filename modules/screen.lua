@@ -55,17 +55,21 @@ function Module:onSlowUpdate()
 end
 
 function Module:onScreenReply(output)
-    if self.logIO then
-        debugf("receive: %s", output)
-    end
     
     local decoded = json.decode(output)
     if decoded then
-        for k,v in pairs(self.screens) do printf(k) end
         local screen = self.screens[decoded.target]
         if screen then
             screen:onReply(decoded.payload)
+            if self.logIO then
+                debugf("receive: %s", output)
+            end
+            return
         end
+    end
+
+    if self.logIO then
+        debugf("receive not handled: %s", output)
     end
 end
 
