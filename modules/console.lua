@@ -37,6 +37,7 @@ function Module:connectTo(name)
             end
             element.element.setRenderScript([[
                 local render = require('samedicorp.toolkit.toolkit')
+                local Layer = require('samedicorp.toolkit.layer')
                 frame = frame or 0
                 buffer = buffer or {}
                 local input = getInput()
@@ -44,7 +45,7 @@ function Module:connectTo(name)
                     table.insert(buffer, input)
                 end
 
-                local layer = render.Layer()
+                local layer = Layer.new()
                 layer:textLineField(buffer, render:safeRect())
 
                 frame = frame + 1
