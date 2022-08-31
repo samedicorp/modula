@@ -19,7 +19,8 @@ function Module:register(parameters)
     parameters = parameters or {}
 
     self.monitorContent = parameters.monitorContent or false
-
+    self.containers = {}
+    
     modula:registerService(self, "containers")
     modula:registerForEvents(self, "onStart", "onStop", "onSlowUpdate")
 
@@ -38,11 +39,11 @@ function Module:onStart()
     self:checkForChanges()
     if self.monitorContent then
         self:requestContainerContent()
-    end
 
-    -- timer which periodically asks the container to refresh its contents
-    -- (the container API is limited to one call every 30 seconds)
-    modula:addTimer("onContentTick", 30.0)
+        -- timer which periodically asks the container to refresh its contents
+        -- (the container API is limited to one call every 30 seconds)
+        modula:addTimer("onContentTick", 30.0)
+    end
 end
 
 function Module:onStop()
@@ -78,20 +79,30 @@ function Module:findContainers(...)
 end
 
 function Module:checkForChanges()
-    local screen = self.screen
-    if screen then
-        for i,container in ipairs(self.containers) do
-            local element = container.element
-            local content = element.getContent()
-            local volume = element.getItemsVolume()
-            local max = element.getMaxVolume()
-            local percentage = volume / max 
-            if container.percentage ~= percentage then
-                container.percentage = percentage
-                container.volume = volume
-                container.max = max
-                modula:call("onContainerChanged", container)
-            end
+    printf("check for changes %s", self)
+    for i,container in ipairs(self.containers) do
+        printf("blah")
+        local element = container.element
+        printf("blah")
+        local content = element.getContent()
+        printf("blah")
+        local volume = element.getItemsVolume()
+        printf("blah")
+        local max = element.getMaxVolume()
+        printf("blah")
+        local percentage = volume / max 
+        printf("blah")
+        if container.percentage ~= percentage then
+            printf("wibble")
+            container.percentage = percentage
+            printf("wibble")
+            container.volume = volume
+            printf("wibble")
+            container.max = max
+            printf("wibble")
+            for k,v in pairs(container) do printf("%s:%s", k,v) end
+            printf("calling container changed")
+            modula:call("onContainerChanged", container)
         end
     end
 end
