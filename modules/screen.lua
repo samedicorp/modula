@@ -38,7 +38,13 @@ function Module:registerScreen(handler, name, code)
             
             local du = element.element
             du.setScriptInput(nil)
-            du.setRenderScript(self.renderScript:format(screenName, code))
+            local toolkit
+            if modula.useLocal then
+                toolkit = "require('samedicorp.toolkit.toolkit')"
+            else
+                toolkit = TOOLKIT_SOURCE()
+            end
+            du.setRenderScript(self.renderScript:format(screenName, toolkit, code))
             debugf("Registered screen %s.", screenName)
             registered = screen
             return true
@@ -85,6 +91,8 @@ Module.renderScript = [[
         payload = json.decode(input)
     end
     
+    %s
+
     %s
     
     if reply then

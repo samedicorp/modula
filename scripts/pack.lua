@@ -35,11 +35,10 @@ end
 
 function appendSource(path, name)
   print(string.format("Loaded %s.", name))
-  local code = "\n" .. load(path)
-    local stripped = code:gsub("%-%- .-\n", "\n")
-    table.insert(source, string.format("function MODULE_%s()\n", name))
-    table.insert(source, stripped)
-    table.insert(source, string.format("end -- MODULE_%s\n", name))
+  local code = compactSource(load(path))
+  table.insert(source, string.format("function MODULE_%s()\n", name))
+  table.insert(source, code)
+  table.insert(source, string.format("end -- MODULE_%s\n", name))
 end
 
 function scanModules(root, path, prefix, modules)
@@ -78,9 +77,35 @@ function writeTemplate(root, format, ...)
   return path
 end
 
+function compactSource(code)
+  local code = "\n" .. code
+  local stripped = code:gsub("%-%- .-\n", "\n")
+
+  -- TODO: could call a minifier here
+
+  return stripped
+end
+
+function appendToolkit()
+  print(string.format("Packing toolkit."))
+  local toolkitRoot = string.format("%s/samedicorp/toolkit", root)
+  local toolkitSource = {}
+  local modules = { 'globals', 'align', 'bar', 'button', 'chart', 'color', 'font', 'label', 'layer', 'point', 'rect', 'screen', 'text', 'triangle', 'widget' }
+  for i,name in ipairs(modules) do
+    local path = string.format("%s/%s.lua", toolkitRoot, name)
+    local code = compactSource(load(path))
+    table.insert(toolkitSource, code)
+  end
+  local combinedSource = table.concat(toolkitSource, "\n")
+  table.insert(source, "function TOOLKIT_SOURCE()\nreturn [[\n")
+  table.insert(source, combinedSource)
+  table.insert(source, "]]\nend -- MODULE_TOOLKIT\n")
+end
+
 print(string.format("Building %s", config.name))
 appendSource(root .. "samedicorp/modula/core.lua", "core")
 scanModules(root, "samedicorp", "", config.modules)
+appendToolkit()
 
 local configSource = load("configure.lua")
 local configEscaped = jsonEscaped(configSource)
@@ -89,6 +114,7 @@ local configIndented = indented(configSource, "        ")
 local moduleSource = table.concat(source, "\n")
 local moduleEscaped = jsonEscaped(moduleSource)
 local moduleIndented = indented(moduleSource, "        ")
+
 
 print(string.format("Using templates from %s.", templatesRoot))
 
