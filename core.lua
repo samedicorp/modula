@@ -286,7 +286,11 @@ function ModulaCore:makeElementObjects(index, core)
         end
         result[category] = objects
         if self.logElements then
-            debugf("Found %s %s.", #objects, category)
+            local names = {}
+            for i,object in ipairs(objects) do
+                table.insert(names, object:name())
+            end
+            debugf("Found %s %s: %s.", #objects, category, table.concat(names, ","))
         end
     end
 
