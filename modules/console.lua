@@ -13,6 +13,10 @@
 --   if failure then 
 --     error(failure) 
 --   end
+-- 
+-- Note that this deliberately does not use the screen module, but instead
+-- implements similar code. This is intentional as it allows the console to
+-- be used to debug the screen module.
 
 local Module = {}
 
@@ -35,23 +39,14 @@ function Module:connectTo(name)
                 self.sysPrint(text)
                 table.insert(self.buffer, text)
             end
-            element.element.setRenderScript([[
-                local screen = require('samedicorp.toolkit.screen').new()
-                frame = frame or 0
-                buffer = buffer or {}
-                local input = getInput()
-                if input then
-                    table.insert(buffer, input)
-                end
 
-                local layer = screen:addLayer()
-                layer:textLineField(buffer, screen:safeRect())
-
-                frame = frame + 1
-                if input then
-                    setOutput(frame)
-                end
-            ]])
+            local toolkit
+            if modula.useLocal then
+                toolkit = "require('samedicorp.toolkit.toolkit')"
+            else
+                toolkit = TOOLKIT_SOURCE()
+            end
+            element.element.setRenderScript(self.renderScript:format(toolkit))
 
             debugf("Installed console.")
         end
@@ -84,5 +79,25 @@ function Module:onConsoleOutput(output)
     self.sending = false
     self:flushBuffer()
 end
+
+Module.renderScript = [[
+    %s
+
+    local screen = toolkit.Screen.new() 
+    frame = frame or 0
+    buffer = buffer or {}
+    local input = getInput()
+    if input then
+        table.insert(buffer, input)
+    end
+
+    local layer = screen:addLayer()
+    layer:textLineField(buffer, screen:safeRect())
+
+    frame = frame + 1
+    if input then
+        setOutput(frame)
+    end
+]]
 
 return Module
