@@ -279,7 +279,7 @@ function ModulaCore:makeElementObjects(index, core)
     for category, elements in pairs(index) do
         local objects = {}
         for i,element in ipairs(elements) do
-            local object = { element = element, id = element.getLocalId(), core = core }
+            local object = { element = element, id = element.getLocalId(), core = core, kind = element.getItemId() }
             setmetatable(object, { __index = Element })
             table.insert(objects, object)
             table.insert(all, object)
