@@ -490,15 +490,25 @@ function ModulaCore:setupGlobals(system, library, player, construct, unit)
 
     _G.modula = self
     
-    _G.toString = function(item)
-        if type(item) == "table" then
+    _G.toString = function(item, visited)
+        local t = type(item)
+        if t == "table" then
+            visited = visited or {}
             local text = {}
             for k, v in pairs(item) do
-                table.insert(text, string.format("%s: %s", k, toString(v)))
+                local string = visited[v]
+                if not string then
+                    visited[v] = "<recursion>"
+                    string = toString(v, visited)
+                    visited[v] = string
+                end
+                table.insert(text, string.format("%s: %s", k, string))
             end
             return "{ " .. table.concat(text, ", ") .. " }"
+        elseif t == "function" then
+            return "()"
         else
-            return tostring(item)
+            return tostring(item, visited)
         end
     end
 
