@@ -302,6 +302,7 @@ function ModulaCore:allElements()
     local elements = {}
     for k, v in pairs(_G) do
         if (k:find("Unit_") == 1) and (v.getElementClass) then
+            v.hideWidget()
             table.insert(elements, v)
         end
     end
