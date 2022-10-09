@@ -216,7 +216,10 @@ function ModulaCore:registerModule(name, parameters)
         table.insert(self.moduleNames, name)
         self.moduleIndex[name] = module
 
-        module:register(parameters)
+        local status, failure = pcall(module.register, module, parameters)
+        if not status then
+            printf(failure)
+        end
     else
         warning("Can't find module %s", name)
     end
