@@ -79,7 +79,7 @@ end
 
 function compactSource(code)
   local code = "\n" .. code
-  local stripped = code:gsub("%-%- .-\n", "\n")
+  local stripped = code:gsub("%-%-+ .-\n", "\n")
 
   -- TODO: could call a minifier here
 
@@ -89,7 +89,7 @@ end
 function appendToolkit()
   print(string.format("Packing toolkit."))
   local toolkitRoot = string.format("%s/samedicorp/toolkit", root)
-  local toolkitSource = {}
+  local toolkitSource = { "toolkit = { }" }
   local modules = { 'globals', 'align', 'bar', 'button', 'chart', 'color', 'field', 'font', 'label', 'layer', 'point', 'rect', 'screen', 'text', 'triangle', 'widget' }
   for i,name in ipairs(modules) do
     local path = string.format("%s/%s.lua", toolkitRoot, name)
