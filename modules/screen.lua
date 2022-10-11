@@ -39,7 +39,7 @@ function Module:registerScreen(handler, name, code)
             local du = element.element
             du.setScriptInput(nil)
             local toolkit
-            if modula.useLocal then
+            if self:useLocalToolkit() then
                 toolkit = "require('samedicorp.toolkit.toolkit')"
             else
                 toolkit = TOOLKIT_SOURCE()
@@ -77,6 +77,17 @@ function Module:onScreenReply(output)
     if self.logIO then
         debugf("receive not handled: %s", output)
     end
+end
+
+function Module:useLocalToolkit()
+    if modula.useLocal then
+        local status, result = pcall(require, 'samedicorp.toolkit.installed')
+        if status then
+            return result
+        end
+    end
+
+    return false
 end
 
 Module.renderScript = [[
