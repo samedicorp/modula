@@ -45,7 +45,7 @@ function ModulaCore.new(system, library, player, construct, unit, settings)
     instance:registerModules()
     instance:registerActions(settings.actions or {})
 
-    debugf("Initialised Modula Core")
+    debugf("Initialised Modula Core. Lua version %s", _VERSION)
     instance.running = true
 
     return instance
@@ -92,10 +92,60 @@ function ModulaCore:call(handler, ...)
             -- failure = failure:gsub('%[string "%-%- %-%=(%w+).*%]', "%1")
             -- failure = failure:gsub('%[string "%-%- %-%=', "")
             -- failure = failure:gsub('"%-%- |STDERROR%-EVENTHANDLER[^"]*"','chunk'):
-            failure = string.format("%s:%s: %s", o.name, line, message)
-            fail(string.format("%s:%s: %s\n\n%s", o.name, line, message, traceback()))
+            failure = string.format("%s:%s: %s in %s\n\n%s", o.name, line, message, handler, traceback())
+            fail(failure)
             return failure
         end
+    end
+end
+
+function ModulaCore:callx(handler, ...)
+    local objects = self.handlers[handler]
+    if not objects then
+        return
+    end
+
+    for i,o in pairs(objects) do
+        if self.logCalls then
+            debugf("calling %s on %s", handler, o.name)
+        end
+
+        local func = o[handler]
+        local errHandler = function(failure)
+            local pattern = '"[string'
+            local message = string.gsub(failure, '.*:.*:(.*)', "%1")
+            local line = string.gsub(failure, '.*:(.*):.*', "%1")
+            -- printf("ERROR in %s.%s, %s", o.name, handler, line)
+            -- printf(message)
+            -- printf(traceback())
+            -- failure = failure:gsub('%[string "%-%- %-%=(%w+).*%]', "%1")
+            -- failure = failure:gsub('%[string "%-%- %-%=', "")
+            -- failure = failure:gsub('"%-%- |STDERROR%-EVENTHANDLER[^"]*"','chunk'):
+            failure = string.format("%s:%s: %s in %s\n\n%s", o.name, line, message, handler, traceback())
+            fail(failure)
+            return failure
+        end
+
+        local status, result = xpcall(o[handler], errHandler, o, ...)
+        return result
+
+        -- if not status then
+        --     fail(error)
+        --     return error
+
+        --     -- local pattern = '"[strin'
+        --     -- local message = string.gsub(failure, '.*:.*:(.*)', "%1")
+        --     -- local line = string.gsub(failure, '.*:(.*):.*', "%1")
+        --     -- -- printf("ERROR in %s.%s, %s", o.name, handler, line)
+        --     -- -- printf(message)
+        --     -- -- printf(traceback())
+        --     -- -- failure = failure:gsub('%[string "%-%- %-%=(%w+).*%]', "%1")
+        --     -- -- failure = failure:gsub('%[string "%-%- %-%=', "")
+        --     -- -- failure = failure:gsub('"%-%- |STDERROR%-EVENTHANDLER[^"]*"','chunk'):
+        --     -- failure = string.format("%s:%s: %s in %s", o.name, line, message, handler)
+        --     -- fail(string.format("%s:%s: %s\nin %s\n\n%s", o.name, line, message, handler, traceback()))
+        --     -- return failure
+        -- end
     end
 end
 
@@ -293,7 +343,8 @@ function ModulaCore:makeElementObjects(index, core)
         local objects = {}
         for i,element in ipairs(elements) do
             local object = { 
-                element = element, 
+                element = element,  -- TODO: deprecate this
+                object = element,
                 id = element.getLocalId(), 
                 core = core, 
                 kind = element.getItemId() 
@@ -559,6 +610,9 @@ function ModulaCore:setupGlobals(system, library, player, construct, unit)
     end
 
     _G.fail = function(format, ...)
+        self:stopTimers()
+        self.running = false
+
         local message = format:format(...)
         system.print(message)
         system.showScreen(1)
