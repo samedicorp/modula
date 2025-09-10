@@ -34,7 +34,7 @@ end
 -- ---------------------------------------------------------------------
 
 function Module:onStart()
-    debugf("Container Monitor started.")
+    debugf("Containers started.")
 
     self:checkForChanges()
     if self.monitorContent then
@@ -47,7 +47,7 @@ function Module:onStart()
 end
 
 function Module:onStop()
-    debugf("Container Monitor stopped.")
+    debugf("Containers Monitor stopped.")
 end
 
 function Module:onContentUpdate()
