@@ -1,4 +1,3 @@
-require('lfs')
 require("configure")
 
 local root = arg[1]
@@ -72,7 +71,7 @@ function writeTemplate(root, format, ...)
   local path = string.format("%sautoconf/custom/%s.%s", root, config.name, format)
   local template = load(string.format("%s%s/packed.%s", root, templatesRoot, format))
   save(path, string.format(template, ...))
-  print(string.format("Exported %s.%s", config.name, format))
+  print(string.format("Exported %s.%s %s", config.name, format, path))
 
   return path
 end
@@ -125,13 +124,6 @@ writeTemplate(root, "conf", config.name, configIndented, moduleIndented)
 -- copy the generated json to the clipboard
 local command = string.format('clip.exe < "%s"', jsonPath)
 os.execute(command)
-
--- attempt to write PTS versions too
--- (assumes the PTS game is installed next to the standard game)
-local ptsRoot = root .. "../../../../Dual Universe PTS/Game/Data/lua/"
-writeTemplate(ptsRoot, "json", configEscaped, moduleEscaped)
-writeTemplate(ptsRoot, "conf", config.name, configIndented, moduleIndented)
-
 
 print("Done.")
 
