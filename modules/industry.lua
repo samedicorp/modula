@@ -43,13 +43,12 @@ end
 function Module:reportMachines()
     local machines = self:getMachines()
     for i, machine in ipairs(machines) do
-        debugf("Found industry unit: %s (%s)", machine:name(), machine:label())
-        if machine.mainProduct then
-            debugf("  Producing: %s x%d", machine.mainProduct:getName(), machine.mainProduct.quantity)
-        else
-            debugf("  Not producing anything.")
-        end
+        debugf("Found %s '%s'", machine:label(), machine:name())
         debugf("State is %s", machine:status())
+
+        for _, product in pairs(machine:products()) do
+            debugf("  Producing: %s x%d", product:getName(), product.quantity)
+        end
     end
 end
 
@@ -68,33 +67,14 @@ function Module:findIndustryElements(...)
     local machines = {}
     for i, class in ipairs({ ... }) do
         modula:withElements(class, function(element)
-            self:setupMachine(element)
+            local meta = getmetatable(element)
+            meta.__index = Machine
+            setmetatable(element, meta)
             table.insert(machines, element)
             -- debugf("Found %s '%s' %s", element:label(), element:name(), element.object.getClass())
         end)
     end
     self.machines = machines
-end
-
-function Module:setupMachine(machine)
-    -- change element to be a subclass of Machine instead of Element
-    setmetatable(machine, { __index = Machine })
-
-    local info = machine:info()
-
-    local productInfos = {}
-    for n, productInfo in pairs(info.currentProducts) do
-        local product = {
-            id = productInfo.id,
-            quantity = productInfo.quantity
-        }
-        product.info = system.getItem(productInfo.id)
-        setmetatable(product, { __index = Product })
-        table.insert(productInfos, product)
-    end
-
-    machine.products = productInfos
-    machine.mainProduct = productInfos[1]
 end
 
 function Machine:info()
@@ -146,7 +126,25 @@ function Machine:isMissingOutputContainer()
 end
 
 function Machine:recipe()
-    return self:info().currentRecipe
+    return self.object.getOutputs()[1]
+end
+
+function Machine:mainProduct()
+    return self:products()[1]
+end
+
+function Machine:products()
+    local products = {}
+    for n, info in pairs(self.object.getOutputs()) do
+        local product = {
+            id = info.id,
+            quantity = info.quantity,
+            info = system.getItem(info.id)
+        }
+        setmetatable(product, { __index = Product })
+        table.insert(products, product)
+    end
+    return products
 end
 
 function Machine:setRecipe(recipeId)
