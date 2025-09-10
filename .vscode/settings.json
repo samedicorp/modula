@@ -1,3 +1,5 @@
 {
-    "Lua.workspace.checkThirdParty": false
+    "Lua.workspace.checkThirdParty": false,
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": true
 }
