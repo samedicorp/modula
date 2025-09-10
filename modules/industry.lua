@@ -43,11 +43,10 @@ end
 function Module:reportMachines()
     local machines = self:getMachines()
     for i, machine in ipairs(machines) do
-        debugf("Found %s '%s'", machine:label(), machine:name())
-        debugf("State is %s", machine:status())
+        debugf("\nFound %s '%s' - %s", machine:label(), machine:name(), machine:status())
 
         for _, product in pairs(machine:products()) do
-            debugf("  Producing: %s x%d", product:getName(), product.quantity)
+            debugf("- %s x%s", product.name, product.quantity or 0)
         end
     end
 end
@@ -130,25 +129,34 @@ function Machine:recipe()
 end
 
 function Machine:mainProduct()
-    return self:products()[1]
+    return self:productForOutput(self.object.getOutputs()[1])
 end
 
 function Machine:products()
     local products = {}
-    for n, info in pairs(self.object.getOutputs()) do
-        local product = {
-            id = info.id,
-            quantity = info.quantity,
-            info = system.getItem(info.id)
-        }
-        setmetatable(product, { __index = Product })
+    for n, output in pairs(self.object.getOutputs()) do
+        local product = self:productForOutput(output)
         table.insert(products, product)
     end
+
     return products
 end
 
+function Machine:productForOutput(output)
+    local info = system.getItem(output.id)
+    local product = {
+        id = output.id,
+        quantity = output.quantity,
+        info = info,
+        name = info.locDisplayName
+    }
+    setmetatable(product, { __index = Product })
+    return product
+end
+
 function Machine:setRecipe(recipeId)
-    return self.object.setOutput(recipeId)
+    local result = self.object.setOutput(recipeId)
+    return result
 end
 
 function Machine:start()
@@ -156,15 +164,7 @@ function Machine:start()
 end
 
 function Machine:stop()
-    self.object.stop()
-end
-
-function Product:getName()
-    return self.info.locDisplayName
-end
-
-function Product:getIcon()
-    return self.info.iconPath
+    return self.object.stop(true)
 end
 
 return Module
