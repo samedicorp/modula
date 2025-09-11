@@ -37,7 +37,7 @@ function ModulaCore.new(system, library, player, construct, unit, settings)
         rawPrint = system.print
     }
 
-    setmetatable(instance, {__index = ModulaCore})
+    setmetatable(instance, { __index = ModulaCore })
 
     instance:setupGlobals(system, library, player, construct, unit)
     instance:setupHandlers()
@@ -51,6 +51,11 @@ function ModulaCore.new(system, library, player, construct, unit, settings)
     return instance
 end
 
+function ModulaCore:stop()
+    self.running = false
+    self:stopTimers()
+    self:call("onStop")
+end
 
 -- ---------------------------------------------------------------------
 -- Event Handlers
@@ -75,7 +80,7 @@ function ModulaCore:call(handler, ...)
         return
     end
 
-    for i,o in pairs(objects) do
+    for i, o in pairs(objects) do
         if self.logCalls then
             debugf("calling %s on %s", handler, o.name)
         end
@@ -105,7 +110,7 @@ function ModulaCore:callx(handler, ...)
         return
     end
 
-    for i,o in pairs(objects) do
+    for i, o in pairs(objects) do
         if self.logCalls then
             debugf("calling %s on %s", handler, o.name)
         end
@@ -151,7 +156,7 @@ end
 
 function ModulaCore:registerForEvents(object, ...)
     local handlers = { ... }
-    for i,handler in ipairs(handlers) do
+    for i, handler in ipairs(handlers) do
         if not object[handler] then
             warning("Module %s does not have a handler for %s", object.name, handler)
         else
@@ -174,8 +179,6 @@ function ModulaCore:onStart()
 end
 
 function ModulaCore:onStop()
-    self.running = false
-    self:stopTimers()
 end
 
 function ModulaCore:onInput(text)
@@ -221,7 +224,7 @@ function ModulaCore:addTimer(name, rate)
 end
 
 function ModulaCore:stopTimers()
-    for _,name in ipairs(self.timers) do
+    for _, name in ipairs(self.timers) do
         unit.stopTimer(name)
     end
 end
@@ -259,7 +262,7 @@ function ModulaCore:registerModule(name, parameters)
         if self.logRegistrations then
             debugf("Registering module: %s", name)
         end
-        local module = { }
+        local module = {}
         setmetatable(module, { __index = prototype })
 
         table.insert(self.modules, module)
@@ -279,9 +282,9 @@ end
 function ModulaCore:loadModule(name)
     local module
 
-    if self.useLocal then 
+    if self.useLocal then
         -- prefer local source version if it is present
-        module = require(name) 
+        module = require(name)
     end
 
     if module then
@@ -318,14 +321,13 @@ function Element:label()
     return self.core.getElementDisplayNameById(self.id)
 end
 
-
 function ModulaCore:loadElements()
     local all = self:allElements()
     local categorised = self:categoriseElements(all)
     local cores = categorised.CoreUnitStatic or categorised.CoreUnitDynamic or
-    categorised.CoreUnitSpace
+        categorised.CoreUnitSpace
     if cores and (#cores > 0) then
-        local core = cores[1] 
+        local core = cores[1]
         self.core = core
         self.elements = self:makeElementObjects(categorised, core)
     else
@@ -341,13 +343,13 @@ function ModulaCore:makeElementObjects(index, core)
     local all = {}
     for category, elements in pairs(index) do
         local objects = {}
-        for i,element in ipairs(elements) do
-            local object = { 
-                element = element,  -- TODO: deprecate this
+        for i, element in ipairs(elements) do
+            local object = {
+                element = element, -- TODO: deprecate this
                 object = element,
-                id = element.getLocalId(), 
-                core = core, 
-                kind = element.getItemId() 
+                id = element.getLocalId(),
+                core = core,
+                kind = element.getItemId()
             }
             setmetatable(object, { __index = Element })
             table.insert(objects, object)
@@ -356,7 +358,7 @@ function ModulaCore:makeElementObjects(index, core)
         result[category] = objects
         if self.logElements then
             local names = {}
-            for i,object in ipairs(objects) do
+            for i, object in ipairs(objects) do
                 table.insert(names, object:name())
             end
             debugf("Found %s %s: %s.", #objects, category, table.concat(names, ","))
@@ -406,7 +408,7 @@ end
 function ModulaCore:withElements(category, action)
     local elements = self.elements[category]
     if elements then
-        for i, element in ipairs(elements) do 
+        for i, element in ipairs(elements) do
             if action(element, i) then
                 break
             end
@@ -414,13 +416,12 @@ function ModulaCore:withElements(category, action)
     end
 end
 
-
 -- ---------------------------------------------------------------------
 -- Input
 -- ---------------------------------------------------------------------
 
 function ModulaCore:registerActions(config)
-    for k,entry in pairs(config) do
+    for k, entry in pairs(config) do
         entry.start = entry.start or entry.loop or entry.onoff or entry.all
         entry.loop = entry.loop or entry.all
         entry.stop = entry.stop or entry.onoff or entry.all
@@ -437,7 +438,7 @@ function ModulaCore:registerActions(config)
 end
 
 function ModulaCore:checkActionHandlers(module, ...)
-    for i,handler in ipairs({ ... }) do
+    for i, handler in ipairs({ ... }) do
         if handler and not module[handler] then
             warning("Module %s does not have an action handler %s", module.name, handler)
         end
@@ -455,7 +456,6 @@ function ModulaCore:dispatchAction(action, mode)
                 entry.startTime = time
                 entry.loopTime = time
                 entry.longDone = false
-
             elseif mode == "loop" then
                 if entry.longDone then
                     return
@@ -466,14 +466,12 @@ function ModulaCore:dispatchAction(action, mode)
                     -- do the long press if enough time has elapsed
                     handler = entry.long
                     entry.longDone = true
-                
                 elseif (time - entry.loopTime) < self.loopRepeat then
                     -- if not enough time has passed yet, skip this loop iteration
                     return
                 end
 
                 entry.loopTime = time
-
             else
                 if entry.long and entry.longDone then
                     -- skip the stop action if the long press has been done
@@ -559,7 +557,7 @@ function ModulaCore:setupGlobals(system, library, player, construct, unit)
     _G.construct = _G.construct or construct
 
     _G.modula = self
-    
+
     _G.toString = function(item, visited)
         local t = type(item)
         if t == "table" then
@@ -590,7 +588,7 @@ function ModulaCore:setupGlobals(system, library, player, construct, unit)
             rawPrint(format:format(...))
         else
             rawPrint(toString(format))
-            for i, a in ipairs({...}) do rawPrint(toString(a)) end
+            for i, a in ipairs({ ... }) do rawPrint(toString(a)) end
         end
     end
 
@@ -617,12 +615,12 @@ function ModulaCore:setupGlobals(system, library, player, construct, unit)
         system.print(message)
         system.showScreen(1)
         system.setScreen(string.format(
-                             '<div class="window" style="position: absolute; top="10vh"; left="45vw"; width="10vw"><h1 style="middle">Error</h1><span>%s</span></div>',
-                             htmlEscape(message)))
+            '<div class="window" style="position: absolute; top="10vh"; left="45vw"; width="10vw"><h1 style="middle">Error</h1><span>%s</span></div>',
+            htmlEscape(message)))
     end
 
     _G.htmlEscape = function(item)
-        return tostring(item):gsub("&", "&amp;"):gsub("<","&lt;"):gsub(">", "&gt;"):gsub("\n", "<br>")
+        return tostring(item):gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;"):gsub("\n", "<br>")
     end
 end
 
