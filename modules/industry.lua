@@ -159,8 +159,13 @@ function Machine:setRecipe(recipeId)
     return result
 end
 
-function Machine:start()
-    self.object.startRun()
+function Machine:start(amount)
+    amount = amount or 0
+    if amount > 0 then
+        self.object.startMaintain(amount)
+    else
+        self.object.startRun()
+    end
 end
 
 function Machine:stop()
