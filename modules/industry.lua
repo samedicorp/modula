@@ -28,8 +28,8 @@ function Module:onStart()
     debugf("Industry started.")
 end
 
-function Module:onStop()
-    debugf("Industry stopped.")
+function Module:onStopping()
+    debugf("Industry stopping.")
 end
 
 -- ---------------------------------------------------------------------

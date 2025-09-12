@@ -18,13 +18,13 @@ function Module:onStart()
     debugf("Panel manager running.")
 end
 
-function Module:onStop()
-    for name,panel in pairs(self.panels) do
+function Module:onStopping()
+    for name, panel in pairs(self.panels) do
         panel:hide()
     end
 
     self.panels = {}
-    debugf("Panel manager stopped.")
+    debugf("Panel manager stopping.")
 end
 
 function Module:panelNamed(name)
@@ -44,7 +44,7 @@ end
 function Panel:show()
     if not self.id then
         self.id = system.createWidgetPanel(self.title)
-        for i,widget in ipairs(self.widgets) do
+        for i, widget in ipairs(self.widgets) do
             widget:show()
         end
     end
@@ -52,7 +52,7 @@ end
 
 function Panel:hide()
     if self.id then
-        for i,widget in ipairs(self.widgets) do
+        for i, widget in ipairs(self.widgets) do
             widget:hide()
         end
         system.destroyWidgetPanel(self.id)
@@ -62,7 +62,7 @@ end
 
 function Panel:addWidgets(widgets)
     local added = {}
-    for name,widget in pairs(widgets) do
+    for name, widget in pairs(widgets) do
         if widget.label or widget.unit then
             widget.type = "value"
         else
@@ -70,7 +70,7 @@ function Panel:addWidgets(widgets)
         end
         local record = self:addWidget(name, widget.type)
         added[name] = record
-        for k,v in pairs(widget) do
+        for k, v in pairs(widget) do
             record[k] = v
         end
         if widget.value then
@@ -94,7 +94,7 @@ function Widget:show()
         self.id = system.createWidget(self.panel.id, self.type)
         if self.data then
             system.addDataToWidget(self.data, self.id)
-       end
+        end
     end
 end
 
@@ -155,9 +155,9 @@ end
 
 function Widget:time(seconds)
     local hours = math.floor(seconds / 3600)
-    seconds = seconds - hours*3600
+    seconds = seconds - hours * 3600
     local mins = math.floor(seconds / 60)
-    seconds = math.floor(seconds - mins*60)
+    seconds = math.floor(seconds - mins * 60)
     if hours > 0 then
         return string.format("%sh %sm %ss", hours, mins, seconds)
     elseif mins > 0 then

@@ -51,12 +51,6 @@ function ModulaCore.new(system, library, player, construct, unit, settings)
     return instance
 end
 
-function ModulaCore:stop()
-    self.running = false
-    self:stopTimers()
-    self:call("onStop")
-end
-
 -- ---------------------------------------------------------------------
 -- Event Handlers
 -- ---------------------------------------------------------------------
@@ -179,6 +173,12 @@ function ModulaCore:onStart()
 end
 
 function ModulaCore:onStop()
+    self.stopping = true
+    self:stopTimers()
+    self:call("onStopping")
+    self.running = false
+    self.stopping = false
+    debugf("Shut down Modula Core.")
 end
 
 function ModulaCore:onInput(text)

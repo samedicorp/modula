@@ -13,7 +13,7 @@
 -- Clients of this service send the module a list of the container classes
 -- that they are interested in, and then listen for onContainerChanged events.
 
-local Module = { }
+local Module = {}
 
 function Module:register(parameters)
     parameters = parameters or {}
@@ -22,7 +22,7 @@ function Module:register(parameters)
     self.containers = {}
 
     modula:registerService(self, "containers")
-    modula:registerForEvents(self, "onStart", "onStop", "onSlowUpdate")
+    modula:registerForEvents(self, "onStart", "onStopping", "onSlowUpdate")
 
     if self.monitorContent then
         modula:registerForEvents(self, "onContentUpdate", "onContentTick")
@@ -46,8 +46,8 @@ function Module:onStart()
     end
 end
 
-function Module:onStop()
-    debugf("Containers Monitor stopped.")
+function Module:onStopping()
+    debugf("Containers Monitor stopping.")
 end
 
 function Module:onContentUpdate()
@@ -62,14 +62,13 @@ function Module:onSlowUpdate()
     self:checkForChanges()
 end
 
-
 -- ---------------------------------------------------------------------
 -- Internal
 -- ---------------------------------------------------------------------
 
 function Module:findContainers(...)
     local containers = {}
-    for i,class in ipairs({ ... }) do
+    for i, class in ipairs({ ... }) do
         modula:withElements(class, function(element)
             table.insert(containers, element)
             debugf("Found container %s", element:name())
@@ -79,12 +78,12 @@ function Module:findContainers(...)
 end
 
 function Module:checkForChanges()
-    for i,container in ipairs(self.containers) do
+    for i, container in ipairs(self.containers) do
         local element = container.element
         local content = element.getContent()
         local volume = element.getItemsVolume()
         local max = element.getMaxVolume()
-        local percentage = volume / max 
+        local percentage = volume / max
         if container.percentage ~= percentage then
             container.percentage = percentage
             container.volume = volume
@@ -95,7 +94,7 @@ function Module:checkForChanges()
 end
 
 function Module:requestContainerContent()
-    for i,container in ipairs(self.containers) do
+    for i, container in ipairs(self.containers) do
         local element = container.element
         element.updateContent()
     end

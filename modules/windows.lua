@@ -52,18 +52,18 @@ function Module:onStart()
     debugf("Window manager running.")
 end
 
-function Module:onStop()
+function Module:onStopping()
     system.showScreen(0)
-    debugf("Window manager stopped.")
+    debugf("Window manager stopping.")
 end
 
 function Module:onFastUpdate()
-   modula:call("onUpdateWindows", self)
+    modula:call("onUpdateWindows", self)
 
-   local loggingEnabled = self.logChanges
-   if loggingEnabled then
-       self.frame = self.frame + 1
-   end
+    local loggingEnabled = self.logChanges
+    if loggingEnabled then
+        self.frame = self.frame + 1
+    end
 
     if self.screenDirty then
         if loggingEnabled then
@@ -92,7 +92,7 @@ end
 function Module:buildScreen()
     local html = { self.header }
 
-    for i,window in ipairs(self.windows) do
+    for i, window in ipairs(self.windows) do
         local data = window.data
         table.insert(html, data.div)
     end
@@ -108,7 +108,7 @@ function Window:update(content)
     if contentChanged then
         -- rebuild css properties
         local properties = {}
-        for k,v in pairs(self) do
+        for k, v in pairs(self) do
             if (k ~= "data") then
                 table.insert(properties, string.format("%s: %s", k, v))
             end
