@@ -13,7 +13,7 @@ function Module:register(parameters)
     parameters = parameters or {}
 
     modula:registerService(self, "industry")
-    modula:registerForEvents(self, "onStart", "onStop")
+    modula:registerForEvents(self, "onStart", "onStopping")
     modula:subclassElement(Machine)
 
     --self:findIndustry()
