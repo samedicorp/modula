@@ -8,6 +8,7 @@ ModulaCore = {
 }
 
 function ModulaCore.new(system, library, player, construct, unit, settings)
+    system.print(string.format("Initialising Modula Core. Lua version %s", _VERSION))
     settings = settings or {}
     local instance = {
         name = "core",
@@ -45,7 +46,7 @@ function ModulaCore.new(system, library, player, construct, unit, settings)
     instance:registerModules()
     instance:registerActions(settings.actions or {})
 
-    debugf("Initialised Modula Core. Lua version %s", _VERSION)
+    debugf("Initialised Modula Core.")
     instance.running = true
 
     return instance
@@ -555,7 +556,6 @@ function ModulaCore:setupGlobals(system, library, player, construct, unit)
     _G.library = _G.library or library
     _G.player = _G.player or player
     _G.construct = _G.construct or construct
-
     _G.modula = self
 
     _G.toString = function(item, visited)
