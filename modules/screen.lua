@@ -5,12 +5,12 @@
 
 local json = require('dkjson')
 
-local Module = { }
-local Screen = { }
+local Module = {}
+local Screen = {}
 
 function Module:register(parameters)
     self.screens = {}
-    self.logIO = parameters.logIO or true
+    self.logIO = parameters.logIO or false
 
     modula:registerForEvents(self, "onScreenReply", "onSlowUpdate")
     modula:registerService(self, "screen")
@@ -35,11 +35,11 @@ function Module:registerScreen(handler, name, code)
             }
             setmetatable(screen, { __index = Screen })
             self.screens[screenName] = screen
-            
+
             local du = element.element
             du.setScriptInput(nil)
             local toolkit
-            if self:useLocalToolkit() then
+            if modula.useLocal then
                 toolkit = "require('samedicorp.toolkit.toolkit')"
             else
                 toolkit = TOOLKIT_SOURCE()
@@ -55,13 +55,12 @@ function Module:registerScreen(handler, name, code)
 end
 
 function Module:onSlowUpdate()
-    for name,screen in pairs(self.screens) do
+    for name, screen in pairs(self.screens) do
         screen:flush()
     end
 end
 
 function Module:onScreenReply(output)
-    
     local decoded = json.decode(output)
     if decoded then
         local screen = self.screens[decoded.target]
@@ -96,16 +95,16 @@ Module.renderScript = [[
     local name = '%s'
     local payload
     local reply
-    
+
     local input = getInput()
     if input then
         payload = json.decode(input)
     end
-    
+
     %s
 
     %s
-    
+
     if reply then
         local payload = { target = name, payload = reply }
         local status, result = pcall(json.encode, payload)
@@ -151,6 +150,5 @@ function Screen:onReply(reply)
         self:flush()
     end
 end
-
 
 return Module
