@@ -318,8 +318,24 @@ function Element:name()
     return self.element.getName()
 end
 
+function Element:simpleName()
+    return self:simplifyName(self.element.getName())
+end
+
+function Element:simplifyName(name)
+    local removeWords = { "Basic", "Uncommon", "Industry", "Product", "Pure" }
+    for _, word in ipairs(removeWords) do
+        name = name:gsub(word, "")
+    end
+    return name
+end
+
 function Element:label()
     return self.core.getElementDisplayNameById(self.id)
+end
+
+function Element:simpleLabel()
+    return self:simplifyName(self.core.getElementDisplayNameById(self.id))
 end
 
 function ModulaCore:loadElements()
