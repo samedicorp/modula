@@ -8,6 +8,7 @@
 local Module = {}
 local Machine = {}
 local Product = {}
+local Input = {}
 
 function Module:register(parameters)
     parameters = parameters or {}
@@ -130,6 +131,16 @@ end
 
 function Machine:mainProduct()
     return self:productForOutput(self.object.getOutputs()[1])
+end
+
+function Machine:inputs()
+    local inputs = {}
+    for n, output in pairs(self.object.getInputs()) do
+        local product = self:productForOutput(output)
+        table.insert(inputs, product)
+    end
+
+    return inputs
 end
 
 function Machine:products()
