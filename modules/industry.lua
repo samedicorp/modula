@@ -159,8 +159,10 @@ function Machine:productForOutput(output)
         id = output.id,
         quantity = output.quantity,
         info = info,
-        name = info.locDisplayName
+        name = info.locDisplayName,
+        recipes = system.getRecipes(output.id)
     }
+
     setmetatable(product, { __index = Product })
     return product
 end
