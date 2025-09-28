@@ -18,7 +18,7 @@ function Module:register(parameters)
     modula:subclassElement(Machine)
 
     --self:findIndustry()
-    self:findIndustryElements("Industry1")
+    self:findIndustryElements("Industry1", "Industry2", "Industry3", "Industry4", "Industry5")
 end
 
 -- ---------------------------------------------------------------------
@@ -155,12 +155,23 @@ end
 
 function Machine:productForOutput(output)
     local info = system.getItem(output.id)
+    local recipes = system.getRecipes(output.id)
+    local mainRecipe
+    for i, recipe in ipairs(recipes) do
+        if recipe.products[1].id == output.id then
+            mainRecipe = recipe
+            mainRecipe.quantity = recipe.products[1].quantity
+            break
+        end
+    end
+
     local product = {
         id = output.id,
         quantity = output.quantity,
         info = info,
         name = info.locDisplayName,
-        recipes = system.getRecipes(output.id)
+        recipes = recipes,
+        mainRecipe = mainRecipe,
     }
 
     setmetatable(product, { __index = Product })
