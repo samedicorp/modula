@@ -105,6 +105,7 @@ function Module:findIndustryElements(...)
             meta.__index = Machine
             setmetatable(element, meta)
             table.insert(machines, element)
+            element.industry = self
             -- debugf("Found %s '%s' %s", element:label(), element:name(), element.object.getClass())
         end)
     end
@@ -203,28 +204,8 @@ function Machine:productForOutput(output)
     if not output then
         return nil
     end
-    local info = system.getItem(output.id)
-    local recipes = system.getRecipes(output.id)
-    local mainRecipe
-    for i, recipe in ipairs(recipes) do
-        if recipe.products[1].id == output.id then
-            mainRecipe = recipe
-            mainRecipe.quantity = recipe.products[1].quantity
-            break
-        end
-    end
 
-    local product = {
-        id = output.id,
-        quantity = output.quantity,
-        info = info,
-        name = info.locDisplayName,
-        recipes = recipes,
-        mainRecipe = mainRecipe,
-    }
-
-    setmetatable(product, { __index = Product })
-    return product
+    return self.industry:productForItem(output.id)
 end
 
 function Machine:setRecipe(recipeId)
