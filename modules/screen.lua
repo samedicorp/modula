@@ -47,10 +47,18 @@ function Module:registerScreen(handler, name, script)
                     screen = require('%s')
                 end
 
-                reply = screen:render(payload, toolkit)
                 ]], script)
             else
-                toolkit = TOOLKIT_SOURCE()
+                toolkit = string.format([[
+                    %s
+
+                    %s
+
+                    if frame == 1 then
+                        screen = SCREEN_%s()
+                    end
+
+                ]], TOOLKIT_SOURCE(), SCREEN_SOURCE(), screenName)
             end
             du.setRenderScript(self.renderScript:format(screenName, toolkit))
             debugf("Registered screen %s.", screenName)
@@ -102,7 +110,6 @@ Module.renderScript = [[
     frame = (frame or 0) + 1
     local name = '%s'
     local payload
-    local reply
 
     local input = getInput()
     if input then
@@ -111,6 +118,7 @@ Module.renderScript = [[
 
     %s
 
+    local reply = screen:render(payload, toolkit)
     if reply then
         local payload = { target = name, payload = reply }
         local status, result = pcall(json.encode, payload)

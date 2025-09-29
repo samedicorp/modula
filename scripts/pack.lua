@@ -101,16 +101,37 @@ function appendToolkit()
     local code = compactSource(load(path))
     table.insert(toolkitSource, code)
   end
+
   local combinedSource = table.concat(toolkitSource, "\n")
   table.insert(source, "function TOOLKIT_SOURCE()\nreturn [[\n")
   table.insert(source, combinedSource)
   table.insert(source, "]]\nend -- MODULE_TOOLKIT\n")
 end
 
+function appendScreens()
+  print(string.format("Packing screens."))
+  local screenSource = {}
+  for name, settings in pairs(config.screens) do
+    local path = root .. name:gsub("[.]", "/") .. ".lua"
+    local safeName = name:gsub("[.-]", "_")
+    local screenName = settings.name or safeName
+    local code = compactSource(load(path))
+    table.insert(screenSource, string.format("function SCREEN_%s()\n", screenName))
+    table.insert(screenSource, code)
+    table.insert(screenSource, string.format("end -- SCREEN_%s\n", screenName))
+  end
+
+  local combinedSource = table.concat(screenSource, "\n")
+  table.insert(source, "function SCREEN_SOURCE()\nreturn [[\n")
+  table.insert(source, combinedSource)
+  table.insert(source, "]]\nend -- MODULE_SCREEN\n")
+end
+
 print(string.format("Building %s", config.name))
 appendSource(root .. "samedicorp/modula/core.lua", "core")
 scanModules(root, "samedicorp", "", config.modules)
 appendToolkit()
+appendScreens()
 
 local configSource = load("configure.lua")
 local configEscaped = jsonEscaped(configSource)
