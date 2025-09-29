@@ -54,8 +54,11 @@ function Module:registerScreen(handler, name, script)
 
                     %s
 
-                    if frame == 1 then
+                    if not toolkit then
+                        toolkit = MODULE_toolkit()
+                        debugf("Loaded toolkit.")
                         screen = SCREEN_%s()
+                        debugf("Loaded screen %%s.", name)
                     end
 
                 ]], TOOLKIT_SOURCE(), SCREEN_SOURCE(), screenName)

@@ -88,7 +88,7 @@ end
 function appendToolkit()
   print(string.format("Packing toolkit."))
   local toolkitRoot = string.format("%s/samedicorp/toolkit", root)
-  local toolkitSource = { "toolkit = { }" }
+  local toolkitSource = { "function MODULE_toolkit()", "local toolkit = { }" }
   local modules = { 'globals', 'align', 'color', 'font', 'point', 'rect', 'screen', 'text', 'triangle', 'widget' }
   for i, name in ipairs(modules) do
     local path = string.format("%s/%s.lua", toolkitRoot, name)
@@ -101,6 +101,9 @@ function appendToolkit()
     local code = compactSource(load(path))
     table.insert(toolkitSource, code)
   end
+
+  table.insert(toolkitSource, "return toolkit")
+  table.insert(toolkitSource, "end -- MODULE_toolkit\n")
 
   local combinedSource = table.concat(toolkitSource, "\n")
   table.insert(source, "function TOOLKIT_SOURCE()\nreturn [[\n")
