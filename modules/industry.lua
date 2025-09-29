@@ -59,6 +59,40 @@ function Module:withMachines(fn)
     end
 end
 
+function Module:productForItem(item)
+    if not item then
+        return nil
+    end
+    local info = system.getItem(item)
+    local recipes = system.getRecipes(item)
+
+    local product = {
+        id = item,
+        info = info,
+        name = info.locDisplayName,
+        recipes = recipes,
+    }
+
+    setmetatable(product, { __index = Product })
+    return product
+end
+
+function Product:mainRecipe()
+    local maxQuantity = 0
+    local mainRecipe
+    for i, recipe in ipairs(self.recipes) do
+        for j, product in ipairs(recipe.products) do
+            if (product.id == self.id) and product.quantity > maxQuantity then
+                mainRecipe = recipe
+                recipe.mainProduct = product
+                maxQuantity = product.quantity
+            end
+        end
+    end
+
+    return mainRecipe
+end
+
 -- ---------------------------------------------------------------------
 -- Internal
 -- ---------------------------------------------------------------------
@@ -79,6 +113,14 @@ end
 
 function Machine:info()
     return self.object.getInfo()
+end
+
+function Machine:itemId()
+    return self.object.getItemId()
+end
+
+function Machine:class()
+    return self.object.getClassId()
 end
 
 function Machine:state()
