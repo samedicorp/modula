@@ -137,7 +137,9 @@ function Machine:inputs()
     local inputs = {}
     for n, output in pairs(self.object.getInputs()) do
         local product = self:productForOutput(output)
-        table.insert(inputs, product)
+        if product then
+            table.insert(inputs, product)
+        end
     end
 
     return inputs
@@ -147,13 +149,18 @@ function Machine:products()
     local products = {}
     for n, output in pairs(self.object.getOutputs()) do
         local product = self:productForOutput(output)
-        table.insert(products, product)
+        if product then
+            table.insert(products, product)
+        end
     end
 
     return products
 end
 
 function Machine:productForOutput(output)
+    if not output then
+        return nil
+    end
     local info = system.getItem(output.id)
     local recipes = system.getRecipes(output.id)
     local mainRecipe

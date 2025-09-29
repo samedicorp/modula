@@ -20,7 +20,7 @@ end
 -- Example event handlers
 -- ---------------------------------------------------------------------
 
-function Module:registerScreen(handler, name, code)
+function Module:registerScreen(handler, name, script)
     local core = modula.core
     local registered
     modula:withElements("ScreenUnit", function(element)
@@ -40,11 +40,19 @@ function Module:registerScreen(handler, name, code)
             du.setScriptInput(nil)
             local toolkit
             if modula.useLocal then
-                toolkit = "require('samedicorp.toolkit.toolkit')"
+                toolkit = string.format([[
+
+                if not toolkit then
+                    require('samedicorp.toolkit.toolkit')
+                    screen = require('%s')
+                end
+
+                reply = screen:render(payload, toolkit)
+                ]], script)
             else
                 toolkit = TOOLKIT_SOURCE()
             end
-            du.setRenderScript(self.renderScript:format(screenName, toolkit, code))
+            du.setRenderScript(self.renderScript:format(screenName, toolkit))
             debugf("Registered screen %s.", screenName)
             registered = screen
             return true
@@ -100,8 +108,6 @@ Module.renderScript = [[
     if input then
         payload = json.decode(input)
     end
-
-    %s
 
     %s
 

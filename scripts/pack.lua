@@ -6,30 +6,30 @@ local config = modulaSettings
 local templatesRoot = config.templates or "samedicorp/modula/templates"
 
 function lastPathComponent(path)
-    local items = path:split('/')
-    return items[#items]
-  end
-  
-  function name(path)
-    return lastPathComponent:split(last)
-  end
+  local items = path:split('/')
+  return items[#items]
+end
+
+function name(path)
+  return lastPathComponent:split(last)
+end
 
 function load(path)
-    local f = io.open(path, 'r')
-    local t = ""
-    if f then
-      t = f:read("*all")
-      f:close()
-    end
-    return t
+  local f = io.open(path, 'r')
+  local t = ""
+  if f then
+    t = f:read("*all")
+    f:close()
+  end
+  return t
 end
 
 function save(path, text, mode)
-    local f = io.open(path, mode or 'w')
-    if f then
-      f:write(text)
-      f:close()
-    end
+  local f = io.open(path, mode or 'w')
+  if f then
+    f:write(text)
+    f:close()
+  end
 end
 
 function appendSource(path, name)
@@ -41,30 +41,30 @@ function appendSource(path, name)
 end
 
 function scanModules(root, path, prefix, modules)
-    for name, parameters in pairs(modules) do
-        local path = root .. name:gsub("[.]", "/") .. ".lua"
-        local safeName = name:gsub("[.-]", "_")
+  for name, parameters in pairs(modules) do
+    local path = root .. name:gsub("[.]", "/") .. ".lua"
+    local safeName = name:gsub("[.-]", "_")
 
-        local paramitems = {}
-        for k, v in pairs(parameters) do
-            table.insert(paramitems, string.format("%s = \"%s\"", k, v))
-        end
-
-        local paramstr = ""
-        if #paramitems > 0 then
-            paramstr = string.format(", { %s }", table.concat(paramitems, ","))
-        end
-
-        appendSource(path, safeName)
+    local paramitems = {}
+    for k, v in pairs(parameters) do
+      table.insert(paramitems, string.format("%s = \"%s\"", k, v))
     end
+
+    local paramstr = ""
+    if #paramitems > 0 then
+      paramstr = string.format(", { %s }", table.concat(paramitems, ","))
+    end
+
+    appendSource(path, safeName)
+  end
 end
 
 function jsonEscaped(string)
-    return string:gsub("\\", "\\\\"):gsub("\n", "\\n"):gsub("\"", "\\\"")
+  return string:gsub("\\", "\\\\"):gsub("\n", "\\n"):gsub("\"", "\\\"")
 end
 
 function indented(string, indent)
-    return string:gsub("\n", "\n" .. indent)
+  return string:gsub("\n", "\n" .. indent)
 end
 
 function writeTemplate(root, format, ...)
@@ -89,9 +89,15 @@ function appendToolkit()
   print(string.format("Packing toolkit."))
   local toolkitRoot = string.format("%s/samedicorp/toolkit", root)
   local toolkitSource = { "toolkit = { }" }
-  local modules = { 'globals', 'align', 'bar', 'button', 'chart', 'color', 'field', 'font', 'label', 'layer', 'point', 'rect', 'screen', 'text', 'triangle', 'widget' }
-  for i,name in ipairs(modules) do
+  local modules = { 'globals', 'align', 'color', 'font', 'point', 'rect', 'screen', 'text', 'triangle', 'widget' }
+  for i, name in ipairs(modules) do
     local path = string.format("%s/%s.lua", toolkitRoot, name)
+    local code = compactSource(load(path))
+    table.insert(toolkitSource, code)
+  end
+  local widgets = { 'bar', 'button', 'chart', 'field', 'label', 'layer', 'scrollbar' }
+  for i, name in ipairs(widgets) do
+    local path = string.format("%s/widgets/%s.lua", toolkitRoot, name)
     local code = compactSource(load(path))
     table.insert(toolkitSource, code)
   end
@@ -126,6 +132,3 @@ local command = string.format('clip.exe < "%s"', jsonPath)
 os.execute(command)
 
 print("Done.")
-
-
-
