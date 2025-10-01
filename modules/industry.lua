@@ -77,20 +77,31 @@ function Module:productForItem(item)
     return product
 end
 
-function Product:mainRecipe()
-    local maxQuantity = 0
+function Product:mainRecipe(producer)
+    local maxQuantity = -1
     local mainRecipe
     for i, recipe in ipairs(self.recipes) do
         for j, product in ipairs(recipe.products) do
             if (product.id == self.id) and product.quantity > maxQuantity then
-                mainRecipe = recipe
-                recipe.mainProduct = product
-                maxQuantity = product.quantity
+                if (producer == nil) or self:recipeProducedBy(recipe, producer) then
+                    mainRecipe = recipe
+                    recipe.mainProduct = product
+                    maxQuantity = product.quantity
+                end
             end
         end
     end
 
     return mainRecipe
+end
+
+function Product:recipeProducedBy(recipe, producer)
+    for i, machineId in ipairs(recipe.producers) do
+        if machineId == producer then
+            return true
+        end
+    end
+    return false
 end
 
 -- ---------------------------------------------------------------------
